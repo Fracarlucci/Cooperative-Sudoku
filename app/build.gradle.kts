@@ -5,6 +5,8 @@
  * For more details on building Java & JVM projects, please refer to https://docs.gradle.org/8.6/userguide/building_java_projects.html in the Gradle documentation.
  */
 
+val versionScalaBinary = "2.13"
+
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
@@ -13,6 +15,9 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven {
+        url = uri("https://repo.akka.io/maven")
+    }
 }
 
 dependencies {
@@ -34,6 +39,12 @@ dependencies {
 
     // jsoup HTML parser library @ https://jsoup.org/
     implementation ("org.jsoup:jsoup:1.17.2")
+
+    // Akka
+    implementation (platform("com.typesafe.akka:akka-bom_${versionScalaBinary}:2.9.5"))
+
+    implementation ("com.typesafe.akka:akka-actor-typed_${versionScalaBinary}")
+    testImplementation ("com.typesafe.akka:akka-actor-testkit-typed_${versionScalaBinary}")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
