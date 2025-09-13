@@ -2,8 +2,9 @@ package pcd.ass03.part1.simtrafficexamples;
 
 import pcd.ass03.part1.simengineseq.AbstractSimulation;
 import pcd.ass03.part1.simtrafficbase.*;
+import pcd.ass03.part1.simtrafficbase.messages.*;
 
-import java.util.List;
+import akka.actor.typed.ActorSystem;
 
 /**
  *
@@ -12,13 +13,12 @@ import java.util.List;
  */
 public class TrafficSimulationSingleRoadWithTrafficLightTwoCars extends AbstractSimulation {
 
-    private final ThreadManager threadManager;
     private final RoadsEnv env;
+	private ActorSystem<Message> system;
 
-	public TrafficSimulationSingleRoadWithTrafficLightTwoCars(int nThreads) {
+	public TrafficSimulationSingleRoadWithTrafficLightTwoCars() {
 		super();
         this.env = new RoadsEnv();
-        this.threadManager = new ThreadManager(nThreads, 1, this, env);
 	}
 
 	public void setup() {
@@ -33,25 +33,20 @@ public class TrafficSimulationSingleRoadWithTrafficLightTwoCars extends Abstract
 
 		Road r = env.createRoad(new P2d(0,300), new P2d(1500,300));
 
-		TrafficLight tl = env.createTrafficLight(new P2d(740,300), TrafficLight.TrafficLightState.GREEN, 75, 25, 100, threadManager, this, dt);
+		TrafficLight tl = env.createTrafficLight(new P2d(740,300), TrafficLight.TrafficLightState.GREEN, 75, 25, 100, this, dt);
 		r.addTrafficLight(tl, 740);
 
-		threadManager.generateTrafficLight(List.of(tl));
-
-
-		CarAgent car1 = new CarAgentExtended("car-1", env, r, 0, 0.1, 0.3, 6, threadManager.getActBarrier(), threadManager.getStepBarrier(), this);
+		CarAgent car1 = new CarAgentExtended("car-1", env, r, 0, 0.1, 0.3, 6);
 		this.addAgent(car1);
-		CarAgent car2 = new CarAgentExtended("car-2", env, r, 100, 0.1, 0.3, 5, threadManager.getActBarrier(), threadManager.getStepBarrier(), this);
+		CarAgent car2 = new CarAgentExtended("car-2", env, r, 100, 0.1, 0.3, 5);
 		this.addAgent(car2);
 
-		threadManager.generateCars(List.of(car1, car2));
-		threadManager.setnCyclesPerSec(nCyclesPerSec);
 		this.syncWithTime(nCyclesPerSec);
+		system = ActorSystem.create(ActorManager.create(this, env), "Environment");
 	}
 
 	@Override
 	public void run(int nSteps) {
-		this.threadManager.setSteps(nSteps);
-		this.threadManager.startThreads(this.getDt());
+		system.tell(new Start());
 	}
 }

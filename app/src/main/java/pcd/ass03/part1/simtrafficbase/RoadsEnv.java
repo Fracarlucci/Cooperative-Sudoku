@@ -57,8 +57,8 @@ public class RoadsEnv extends AbstractEnvironment {
 		return r;
 	}
 
-	public TrafficLight createTrafficLight(P2d pos, TrafficLight.TrafficLightState initialState, int greenDuration, int yellowDuration, int redDuration, ThreadManager threadManager, AbstractSimulation sim, int dt) {
-		TrafficLight tl = new TrafficLight(pos, initialState, greenDuration, yellowDuration, redDuration, sim, dt);
+	public TrafficLight createTrafficLight(P2d pos, TrafficLight.TrafficLightState initialState, int greenDuration, int yellowDuration, int redDuration, AbstractSimulation sim, int dt) {
+		TrafficLight tl = new TrafficLight(pos, initialState, greenDuration, yellowDuration, redDuration, dt);
 		this.trafficLights.add(tl);
 		return tl;
 	}

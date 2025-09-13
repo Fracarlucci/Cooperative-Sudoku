@@ -2,9 +2,11 @@ package pcd.ass03.part1.simtrafficexamples;
 
 import pcd.ass03.part1.simengineseq.AbstractSimulation;
 import pcd.ass03.part1.simtrafficbase.*;
+import pcd.ass03.part1.simtrafficbase.messages.*;
 
 import java.util.LinkedList;
 import java.util.List;
+import akka.actor.typed.ActorSystem;
 
 /**
  *
@@ -14,13 +16,12 @@ import java.util.List;
  */
 public class TrafficSimulationSingleRoadSeveralCars extends AbstractSimulation {
 
-	private final ThreadManager threadManager;
 	private final RoadsEnv env;
+	private ActorSystem<Message> system;
 
-	public TrafficSimulationSingleRoadSeveralCars(int nThreads) {
+	public TrafficSimulationSingleRoadSeveralCars() {
 		super();
 		this.env = new RoadsEnv();
-		this.threadManager = new ThreadManager(nThreads, 0, this, env);
 	}
 
 	public void setup() {
@@ -52,18 +53,16 @@ public class TrafficSimulationSingleRoadSeveralCars extends AbstractSimulation {
 					initialPos,
 					carAcceleration,
 					carDeceleration,
-					carMaxSpeed, threadManager.getActBarrier(), threadManager.getStepBarrier(), this);
+					carMaxSpeed);
 			this.addAgent(car);
 			cars.add(car);
 		}
-		threadManager.generateCars(cars);
-		threadManager.setnCyclesPerSec(nCyclesPerSec);
 		this.syncWithTime(nCyclesPerSec);
+		system = ActorSystem.create(ActorManager.create(this, env), "Environment");
 	}
 
 	@Override
 	public void run(int nSteps) {
-		this.threadManager.setSteps(nSteps);
-		this.threadManager.startThreads(this.getDt());
+		system.tell(new Start());
 	}
 }

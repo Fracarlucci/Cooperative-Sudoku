@@ -11,7 +11,7 @@ public class RunTrafficSimulationMassiveTest {
 
 		// For Massive test, set the var
 		// 'stop' inside AbstractSimulation to FALSE
-		var simulation = new TrafficSimulationSingleRoadMassiveNumberOfCars(numCars, numCars);
+		var simulation = new TrafficSimulationSingleRoadMassiveNumberOfCars(numCars);
 		simulation.setup();
 
 		log("Running the simulation: " + numCars + " cars, for " + nSteps + " steps ...");
