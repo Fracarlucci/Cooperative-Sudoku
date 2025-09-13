@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import pcd.ass03.part1.simtrafficbase.messages.Message;
 import pcd.ass03.part1.simtrafficbase.messages.Step;
-import pcd.ass03.part1.simtrafficbase.messages.TrafficLightState;
+import pcd.ass03.part1.simtrafficbase.messages.TrafficLightReady;
 
 public class TrafficLightActor extends AbstractBehavior<Message>{
 
@@ -27,10 +27,9 @@ public class TrafficLightActor extends AbstractBehavior<Message>{
         return newReceiveBuilder()
             .onMessage(Step.class, msg -> {
                 this.trafficLight.semaphoreStep();
-                msg.sender().tell(new TrafficLightState(this.trafficLight.getId(), this.trafficLight.getState()));
+                msg.sender().tell(new TrafficLightReady(getContext().getSelf().narrow()));
                 return this;
             })        
             .build();
     }
-    
 }
