@@ -10,6 +10,7 @@ import akka.actor.typed.javadsl.Receive;
 import pcd.ass03.part1.simengineseq.AbstractSimulation;
 import pcd.ass03.part1.simtrafficbase.messages.Message;
 import pcd.ass03.part1.simtrafficbase.messages.Start;
+import pcd.ass03.part1.simtrafficbase.messages.Step;
 import pcd.ass03.part1.simtrafficbase.messages.Stop;
 
 public class ActorManager extends AbstractBehavior<Message>{
@@ -19,8 +20,6 @@ public class ActorManager extends AbstractBehavior<Message>{
   private final RoadsEnv env;
 
   public static Behavior<Message> create(AbstractSimulation simulation, RoadsEnv env) {
-      // TODO create car actors
-      // TODO create traffic light actors  
       return Behaviors.setup(context -> new ActorManager(context, simulation, env));
     }
 
@@ -34,10 +33,33 @@ public class ActorManager extends AbstractBehavior<Message>{
 
     @Override
     public Receive<Message> createReceive() {
-      // TODO handle messages
       return newReceiveBuilder()
-        .onMessage(Start.class, msg -> { return this; })
+        .onMessage(Start.class, msg -> { 
+          createCarActors();
+          createTrafficLightActors();
+          if (this.trafficLights.isEmpty()) {
+              this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
+          } else {
+              this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
+          }
+          return this; 
+        })
         .onMessage(Stop.class, msg -> Behaviors.stopped())
         .build();
+    }
+
+    private void createCarActors() {
+      for (CarAgentInfo car : env.getAgentInfo()) {
+        ActorRef<Message> carActor = getContext().spawn(CarActor.create(car.getCar()), "car-" + car.getCar().getAgentId());
+        cars.add(carActor);
+      }
+    }
+
+    private void createTrafficLightActors() {
+      int counter = 0;
+      for (TrafficLight tl : env.getTrafficLights()) {
+        ActorRef<Message> tlActor = getContext().spawn(TrafficLightActor.create(tl), "trafficLight-" + counter++);
+        trafficLights.add(tlActor);
+      }
     }
 }
