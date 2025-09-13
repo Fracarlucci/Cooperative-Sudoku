@@ -52,7 +52,7 @@ public abstract class AbstractEnvironment extends Thread {
 	public abstract void doAction(String agentId, Action act);
 
 	public void setnSteps(int numSteps) {
-		this.nSteps = nSteps;
+		this.nSteps = numSteps;
 	}
 
 	public int getnSteps() {
