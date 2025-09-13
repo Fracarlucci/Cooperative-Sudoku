@@ -54,4 +54,8 @@ public abstract class AbstractEnvironment extends Thread {
 	public void setnSteps(int numSteps) {
 		this.nSteps = nSteps;
 	}
+
+	public int getnSteps() {
+		return nSteps;
+	}
 }

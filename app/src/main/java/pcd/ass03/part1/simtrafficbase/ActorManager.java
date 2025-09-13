@@ -26,6 +26,7 @@ public class ActorManager extends AbstractBehavior<Message>{
   private int nTrafficLightsReadyToAct;
   private int nCarsReadyToAct;
   private int nCarsDoneAction;
+  private int nStepsDone;
 
 
   public static Behavior<Message> create(AbstractSimulation simulation, RoadsEnv env) {
@@ -41,6 +42,7 @@ public class ActorManager extends AbstractBehavior<Message>{
         this.nCarsReadyToAct = 0;
         this.nTrafficLightsReadyToAct = 0;
         this.nCarsDoneAction = 0;
+        this.nStepsDone = 0;
     }
 
     @Override
@@ -76,11 +78,14 @@ public class ActorManager extends AbstractBehavior<Message>{
           nCarsDoneAction++;
           if (nCarsDoneAction == this.cars.size()) {
             nCarsDoneAction = 0;
-            if (this.trafficLights.isEmpty()) {
-                this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
-            } else {
-                this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
-            }
+            nStepsDone++;
+            if (nStepsDone == env.getnSteps()) {
+              if (this.trafficLights.isEmpty()) {
+                  this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
+              } else {
+                  this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
+              }
+            }            
           }
           return this;
         })
