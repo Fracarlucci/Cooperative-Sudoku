@@ -97,4 +97,8 @@ public class TrafficLight implements Runnable {
 	public P2d getPos() {
 		return pos;
 	}
+
+	public TrafficLightState getState() {
+		return state;
+	}
 }
