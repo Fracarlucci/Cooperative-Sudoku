@@ -49,4 +49,9 @@ public class TrafficSimulationSingleRoadWithTrafficLightTwoCars extends Abstract
 	public void run(int nSteps) {
 		system.tell(new Start());
 	}
+
+	@Override
+	public void stop() {
+		system.tell(new Stop());
+	}
 }

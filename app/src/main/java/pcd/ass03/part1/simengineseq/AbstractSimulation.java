@@ -1,7 +1,5 @@
 package pcd.ass03.part1.simengineseq;
 
-import pcd.ass03.part1.simengineconcur.GUIMonitor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +35,6 @@ public abstract class AbstractSimulation {
   private long averageTimePerStep;
   // stop = false; for massive test
   private volatile Boolean stop = false;
-  private GUIMonitor monitor = new GUIMonitor();
 
   protected AbstractSimulation() {
     agents = new ArrayList<AbstractAgent>();
@@ -139,21 +136,15 @@ public abstract class AbstractSimulation {
   }
 
   public boolean isStopped(){
-    this.monitor.requestRead();
     boolean state = this.stop;
-    this.monitor.releaseRead();
     return state;
   }
 
   public void stop(){
-    this.monitor.requestWrite();
     this.stop = true;
-    this.monitor.releaseWrite();
   }
 
   public void start(){
-    this.monitor.requestWrite();
     this.stop = false;
-    this.monitor.releaseWrite();
   }
 }
