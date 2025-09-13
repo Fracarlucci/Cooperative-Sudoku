@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import pcd.ass03.part1.simtrafficbase.messages.Message;
 import pcd.ass03.part1.simtrafficbase.messages.Step;
-import pcd.ass03.part1.simtrafficbase.messages.TrafficLightState;
+import pcd.ass03.part1.simtrafficbase.messages.TrafficLightReady;
 
 public class TrafficLightActor extends AbstractBehavior<Message>{
 

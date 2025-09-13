@@ -7,7 +7,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import pcd.ass03.part1.simtrafficbase.messages.Message;
 import pcd.ass03.part1.simtrafficbase.messages.Step;
-import pcd.ass03.part1.simtrafficbase.messages.CarAction;
+import pcd.ass03.part1.simtrafficbase.messages.ActionReady;
+import pcd.ass03.part1.simtrafficbase.messages.DoAction;
+import pcd.ass03.part1.simtrafficbase.messages.ActionDone;
 
 public class CarActor extends AbstractBehavior<Message> {
     
