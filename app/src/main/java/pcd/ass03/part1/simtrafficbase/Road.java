@@ -3,8 +3,6 @@ package pcd.ass03.part1.simtrafficbase;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 public class Road {
 
 	private double len;

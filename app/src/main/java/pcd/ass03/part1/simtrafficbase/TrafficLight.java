@@ -1,8 +1,5 @@
 package pcd.ass03.part1.simtrafficbase;
 
-import pcd.ass03.part1.simengineconcur.Barrier;
-import pcd.ass03.part1.simengineseq.AbstractSimulation;
-
 /**
  * Class modeling the structure and behaviour of a traffic light
  *  
@@ -16,22 +13,15 @@ public class TrafficLight implements Runnable {
 	private int redDuration, greenDuration, yellowDuration;
 	private P2d pos;
 
-	private final Barrier actBarrier;   // Barrier before doing an action.
-	private final Barrier stepBarrier;  // Barrier before doing next step.
-	private final AbstractSimulation simulation;  // Barrier before doing next step.
 	private final int dt;
 
 
-	public TrafficLight(P2d pos, TrafficLightState initialState, int greenDuration, int yellowDuration, int redDuration,
-						Barrier actBarrier, Barrier stepBarrier, AbstractSimulation simulation, int dt) {
+	public TrafficLight(P2d pos, TrafficLightState initialState, int greenDuration, int yellowDuration, int redDuration, int dt) {
 		this.redDuration = redDuration;
 		this.greenDuration = greenDuration;
 		this.yellowDuration = yellowDuration;
 		this.pos = pos;
 		this.initialState = initialState;
-		this.actBarrier = actBarrier;
-		this.stepBarrier = stepBarrier;
-		this.simulation = simulation;
 		this.dt = dt;
 	}
 
@@ -43,15 +33,12 @@ public class TrafficLight implements Runnable {
 	@Override
 	public void run() {
 		while(true) {
-			stepBarrier.waitBefore(simulation);
 			this.semaphoreStep();
 		}
 	}
 
 	public void semaphoreStep() {
 		this.step(this.dt);
-		actBarrier.waitBefore(simulation);
-		actBarrier.waitBefore(simulation);
 	}
 
 	public void step(int dt) {
