@@ -80,12 +80,13 @@ public class ActorManager extends AbstractBehavior<Message>{
             nCarsDoneAction = 0;
             nStepsDone++;
             if (nStepsDone == env.getnSteps()) {
-              if (this.trafficLights.isEmpty()) {
+              simulation.stop();
+            }          
+            if (this.trafficLights.isEmpty()) {
                   this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
               } else {
                   this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
-              }
-            }            
+              }  
           }
           return this;
         })
