@@ -27,10 +27,9 @@ public class TrafficLightActor extends AbstractBehavior<Message>{
         return newReceiveBuilder()
             .onMessage(Step.class, msg -> {
                 this.trafficLight.semaphoreStep();
-                msg.sender().tell(new TrafficLightState(this.trafficLight.getId(), this.trafficLight.getState()));
+                msg.sender().tell(new TrafficLightReady(getContext().getSelf().narrow()));
                 return this;
             })        
             .build();
     }
-    
 }
