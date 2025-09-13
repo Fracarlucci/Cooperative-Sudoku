@@ -60,4 +60,9 @@ public class TrafficSimulationWithCrossRoads extends AbstractSimulation {
 	public void run(int nSteps) {
 		system.tell(new Start());
 	}
+
+	@Override
+	public void stop() {
+		system.tell(new Stop());
+	}
 }

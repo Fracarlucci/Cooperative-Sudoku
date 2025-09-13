@@ -44,4 +44,9 @@ public class TrafficSimulationSingleRoadTwoCars extends AbstractSimulation {
 		system.tell(new Start());
 	}
 
+	@Override
+	public void stop() {
+		system.tell(new Stop());
+	}
+
 }
