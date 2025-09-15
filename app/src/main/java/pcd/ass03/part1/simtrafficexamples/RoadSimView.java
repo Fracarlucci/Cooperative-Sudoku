@@ -45,7 +45,6 @@ public class RoadSimView extends JFrame implements SimulationListener {
 					int nSteps = Integer.parseInt(nStepsField.getText());
 					sim.start();
 
-
 					if(newRun) {
 						sim.run(nSteps);
 						newRun = false;

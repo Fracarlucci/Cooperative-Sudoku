@@ -27,7 +27,15 @@ public class ActorManager extends AbstractBehavior<Message>{
   private int nCarsReadyToAct;
   private int nCarsDoneAction;
   private int nStepsDone;
-
+  private long currentWallTime;
+  
+  int actualSteps = 0;
+  long startWallTime = System.currentTimeMillis();
+  int t = 0;
+  long timePerStep = 0;
+  long startStepTime = 0;
+  int nCyclesPerSec = 25;
+  int dt = 0;
 
   public static Behavior<Message> create(AbstractSimulation simulation, RoadsEnv env) {
       return Behaviors.setup(context -> new ActorManager(context, simulation, env));
@@ -43,17 +51,22 @@ public class ActorManager extends AbstractBehavior<Message>{
         this.nTrafficLightsReadyToAct = 0;
         this.nCarsDoneAction = 0;
         this.nStepsDone = 0;
+        this.dt = simulation.getDt();
     }
 
     @Override
     public Receive<Message> createReceive() {
       return newReceiveBuilder()
-        .onMessage(Start.class, msg -> { 
+        .onMessage(Start.class, msg -> {
+          System.out.println("Starting simulation...");
           createCarActors();
           createTrafficLightActors();
+          currentWallTime = System.currentTimeMillis();
           if (this.trafficLights.isEmpty()) {
               this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
+              System.out.println("No traffic lights present.");
           } else {
+              System.out.println("Traffic lights present: " + this.trafficLights.size());
               this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
           }
           return this; 
@@ -67,6 +80,7 @@ public class ActorManager extends AbstractBehavior<Message>{
           return this;
         })
         .onMessage(ActionReady.class, msg -> {
+          System.out.println("Car ready to act: ");
           nCarsReadyToAct++;
           if (nCarsReadyToAct == this.cars.size()) {
             nCarsReadyToAct = 0;
@@ -75,17 +89,36 @@ public class ActorManager extends AbstractBehavior<Message>{
           return this;
         })
         .onMessage(ActionDone.class, msg -> {
+          System.out.println("Car done action: ");
           nCarsDoneAction++;
           if (nCarsDoneAction == this.cars.size()) {
             nCarsDoneAction = 0;
+
+            if (startStepTime != 0) {
+                timePerStep += System.currentTimeMillis() - startStepTime;
+            }
+            t += dt;
+            currentWallTime = System.currentTimeMillis();
+
+            if (nCyclesPerSec > 0) {
+                simulation.syncWithWallTime(currentWallTime);
+            }
+            startStepTime = System.currentTimeMillis();
             nStepsDone++;
-            if (nStepsDone == env.getnSteps()) {
+            System.out.println("STEPS: " + nStepsDone);
+
+            // endcycleandwait
+            if (nStepsDone >= env.getnSteps()) {
+              this.simulation.stop();
+              getContext().getSelf().tell(new Stop());
+            } else {
+              currentWallTime = System.currentTimeMillis();
               if (this.trafficLights.isEmpty()) {
                   this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
               } else {
                   this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
               }
-            }            
+            }
           }
           return this;
         })
@@ -106,5 +139,9 @@ public class ActorManager extends AbstractBehavior<Message>{
         ActorRef<Message> tlActor = getContext().spawn(TrafficLightActor.create(tl), "trafficLight-" + counter++);
         trafficLights.add(tlActor);
       }
+    }
+
+    public void setnCyclesPerSec(int nCyclesPerSec) {
+        this.nCyclesPerSec = nCyclesPerSec;
     }
 }

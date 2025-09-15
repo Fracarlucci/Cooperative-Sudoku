@@ -4,7 +4,7 @@ package pcd.ass03.part1.simtrafficbase;
  * Class modeling the structure and behaviour of a traffic light
  *  
  */
-public class TrafficLight implements Runnable {
+public class TrafficLight {
 
 
 	public static enum TrafficLightState {GREEN, YELLOW, RED}
@@ -30,12 +30,12 @@ public class TrafficLight implements Runnable {
 		currentTimeInState = 0;
 	}
 
-	@Override
-	public void run() {
-		while(true) {
-			this.semaphoreStep();
-		}
-	}
+	// @Override
+	// public void run() {
+	// 	while(true) {
+	// 		this.semaphoreStep();
+	// 	}
+	// }
 
 	public void semaphoreStep() {
 		this.step(this.dt);

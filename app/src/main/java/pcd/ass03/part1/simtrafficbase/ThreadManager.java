@@ -54,14 +54,14 @@ public class ThreadManager {
         carAgents.forEach(ca -> {
             ca.init(env, dt);
             // Submit the carAgent
-            executor.submit(ca);
+            // executor.submit(ca);
         });
 
         if (trafficLights != null) {
             trafficLights.forEach(tl -> {
                 tl.init();
                 // Submit the trafficLights
-                executor.submit(tl);
+                // executor.submit(tl);
             });
         }
 
