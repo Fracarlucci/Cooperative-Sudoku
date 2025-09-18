@@ -68,9 +68,7 @@ public class ActorManager extends AbstractBehavior<Message>{
           currentWallTime = System.currentTimeMillis();
           if (this.trafficLights.isEmpty()) {
               this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
-              System.out.println("No traffic lights present.");
           } else {
-              System.out.println("Traffic lights present: " + this.trafficLights.size());
               this.trafficLights.forEach(act -> act.tell(new Step(getContext().getSelf())));
           }
           return this; 
@@ -84,7 +82,6 @@ public class ActorManager extends AbstractBehavior<Message>{
           return this;
         })
         .onMessage(ActionReady.class, msg -> {
-          System.out.println("Car ready to act: ");
           nCarsReadyToAct++;
           if (nCarsReadyToAct == this.cars.size()) {
             nCarsReadyToAct = 0;
@@ -93,7 +90,6 @@ public class ActorManager extends AbstractBehavior<Message>{
           return this;
         })
         .onMessage(ActionDone.class, msg -> {
-          System.out.println("Car done action: ");
           nCarsDoneAction++;
           if (nCarsDoneAction >= this.cars.size() && !this.paused) {
             nCarsDoneAction = 0;
@@ -133,7 +129,6 @@ public class ActorManager extends AbstractBehavior<Message>{
         })
         .onMessage(Resume.class, msg -> {
           this.paused = false;
-          System.out.println("Resuming simulation...");
           getContext().getSelf().tell(new ActionDone(getContext().getSelf()));
           return this;
         })

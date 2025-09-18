@@ -37,12 +37,9 @@ public abstract class CarAgent extends AbstractAgent {
    */
   public void senseAndDecide(int dt) {
     AbstractEnvironment env = this.getEnv();
-    System.out.println("Car " + this.getAgentId() + " sensing...");
     currentPercept = (CarPercept) env.getCurrentPercepts(getAgentId());
-    System.out.println("Car " + this.getAgentId() + " sensed: " + currentPercept);
     /* decide */
     selectedAction = Optional.empty();
-    System.out.println("Car " + this.getAgentId() + " deciding...");
     decide(dt);
   }
 
@@ -64,12 +61,6 @@ public abstract class CarAgent extends AbstractAgent {
     return currentSpeed;
   }
 
-  // @Override
-  // public void run() {
-  //     while (true) {
-  //       this.step();
-  //     }
-  // }
   protected void log(String msg) {
     System.out.println("[CAR " + this.getAgentId() + "] " + msg);
   }
@@ -77,7 +68,5 @@ public abstract class CarAgent extends AbstractAgent {
 
   public void step() {
     this.senseAndDecide(getDt());
-    System.out.println("Car " + this.getAgentId() + " sensed and decided.");
-    // this.act();
   }
 }

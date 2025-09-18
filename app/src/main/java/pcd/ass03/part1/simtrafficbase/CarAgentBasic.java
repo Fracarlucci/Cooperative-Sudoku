@@ -84,8 +84,6 @@ public class CarAgentBasic extends CarAgent {
 		
 		if (currentSpeed > 0) {
 			selectedAction = Optional.of(new MoveForward(currentSpeed * dt));
-			System.out.println("Car " + this.getAgentId() + " decided to move forward by " + (currentSpeed * dt));
-			System.out.println("Car " + this.getAgentId() + " dt: " + dt + " speed: " + currentSpeed);
 		}
 	}
 	

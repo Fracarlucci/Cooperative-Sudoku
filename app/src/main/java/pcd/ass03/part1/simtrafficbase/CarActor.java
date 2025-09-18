@@ -28,14 +28,11 @@ public class CarActor extends AbstractBehavior<Message> {
     public Receive<Message> createReceive() {
         return newReceiveBuilder()
             .onMessage(Step.class, msg -> {
-                System.out.println("Car stepping: ");
                 this.carAgent.step();
                 msg.sender().tell(new ActionReady(getContext().getSelf().narrow()));
-                System.out.println("Car stepped: ");
                 return this;
             })
             .onMessage(DoAction.class, msg -> {
-                System.out.println("Car acting: ");
                 this.carAgent.act(); 
                 msg.sender().tell(new ActionDone(getContext().getSelf().narrow())); 
                 return this;
