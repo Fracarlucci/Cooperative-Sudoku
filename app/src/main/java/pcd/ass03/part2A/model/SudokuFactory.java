@@ -1,4 +1,4 @@
-package pcd.ass03.part2.model;
+package pcd.ass03.part2A.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
