@@ -34,7 +34,6 @@ public abstract class AbstractSimulation {
   private long endWallTime;
   private long averageTimePerStep;
   private int t;
-  // stop = false; for massive test
   private volatile Boolean stop = true;
 
   protected AbstractSimulation() {
@@ -64,14 +63,7 @@ public abstract class AbstractSimulation {
     env.setnSteps(numSteps);
     env.init();
 
-
     this.notifyReset(t, agents, env);
-
-    // long timePerStep = 0;
-
-    // endWallTime = System.currentTimeMillis();
-    // this.averageTimePerStep = timePerStep / numSteps;
-
   }
 
   public int getDt() {
