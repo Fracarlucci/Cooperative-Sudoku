@@ -29,13 +29,9 @@ public class ActorManager extends AbstractBehavior<Message>{
   private int nCarsReadyToAct;
   private int nCarsDoneAction;
   private int nStepsDone;
-  private long currentWallTime;
-
   private boolean paused = false;
   
   int actualSteps = 0;
-  long startWallTime = System.currentTimeMillis();
-  int t = 0;
   long timePerStep = 0;
   long startStepTime = 0;
   int nCyclesPerSec = 25;
@@ -65,7 +61,7 @@ public class ActorManager extends AbstractBehavior<Message>{
           System.out.println("Starting simulation...");
           createCarActors();
           createTrafficLightActors();
-          currentWallTime = System.currentTimeMillis();
+          simulation.setCurrentWallTime();
           if (this.trafficLights.isEmpty()) {
               this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
           } else {
@@ -93,27 +89,15 @@ public class ActorManager extends AbstractBehavior<Message>{
           nCarsDoneAction++;
           if (nCarsDoneAction >= this.cars.size() && !this.paused) {
             nCarsDoneAction = 0;
-
-            if (startStepTime != 0) {
-                timePerStep += System.currentTimeMillis() - startStepTime;
-            }
-            t += dt;
-            currentWallTime = System.currentTimeMillis();
-
-            if (nCyclesPerSec > 0) {
-                simulation.syncWithWallTime(currentWallTime);
-            }
-            startStepTime = System.currentTimeMillis();
             nStepsDone++;
-            simulation.notifyNewStep(t, env);
+            simulation.stepCycle();
             System.out.println("STEPS: " + nStepsDone);
 
-            // endcycleandwait
             if (nStepsDone >= env.getnSteps()) {
               this.simulation.stop();
               getContext().getSelf().tell(new Stop());
             } else {
-              currentWallTime = System.currentTimeMillis();
+              simulation.setCurrentWallTime();
               if (this.trafficLights.isEmpty()) {
                   this.cars.forEach(act -> act.tell(new Step(getContext().getSelf())));
               } else {
@@ -149,9 +133,5 @@ public class ActorManager extends AbstractBehavior<Message>{
         ActorRef<Message> tlActor = getContext().spawn(TrafficLightActor.create(tl), "trafficLight-" + counter++);
         trafficLights.add(tlActor);
       }
-    }
-
-    public void setnCyclesPerSec(int nCyclesPerSec) {
-        this.nCyclesPerSec = nCyclesPerSec;
     }
 }

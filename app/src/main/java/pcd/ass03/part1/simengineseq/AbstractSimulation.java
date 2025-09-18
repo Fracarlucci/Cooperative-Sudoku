@@ -33,8 +33,9 @@ public abstract class AbstractSimulation {
   private long startWallTime;
   private long endWallTime;
   private long averageTimePerStep;
+  private int t;
   // stop = false; for massive test
-  private volatile Boolean stop = false;
+  private volatile Boolean stop = true;
 
   protected AbstractSimulation() {
     agents = new ArrayList<AbstractAgent>();
@@ -55,10 +56,10 @@ public abstract class AbstractSimulation {
    */
   public void run(int numSteps) {
 
-    // startWallTime = System.currentTimeMillis();
+    startWallTime = System.currentTimeMillis();
 
     /* initialize the env and the agents inside */
-    int t = t0;
+    this.t = t0;
 
     env.setnSteps(numSteps);
     env.init();
@@ -123,7 +124,7 @@ public abstract class AbstractSimulation {
   }
 
   /* method to sync with wall time at a specified step rate */
-  public void syncWithWallTime(long currentWallTime) {
+  public void syncWithWallTime() {
     try {
       long newWallTime = System.currentTimeMillis();
       long delay = 1000 / this.nStepsPerSec;
@@ -131,9 +132,16 @@ public abstract class AbstractSimulation {
       if (wallTimeDT < delay) {
         Thread.sleep(delay - wallTimeDT);
       }
-    } catch (Exception ex) {
-    }
+    } catch (Exception ex) {}
   }
+
+  public void stepCycle() {
+		this.t += this.dt;
+		notifyNewStep(this.t, this.env);
+		if(nStepsPerSec > 0 ){
+			syncWithWallTime();
+		}
+	}
 
   public boolean isStopped(){
     boolean state = this.stop;
@@ -146,5 +154,9 @@ public abstract class AbstractSimulation {
 
   public void start(){
     this.stop = false;
+  }
+
+  public void setCurrentWallTime() {
+    this.currentWallTime = System.currentTimeMillis();
   }
 }
