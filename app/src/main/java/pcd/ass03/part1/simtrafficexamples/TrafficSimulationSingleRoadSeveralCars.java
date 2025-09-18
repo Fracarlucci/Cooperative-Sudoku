@@ -55,6 +55,7 @@ public class TrafficSimulationSingleRoadSeveralCars extends AbstractSimulation {
 					carDeceleration,
 					carMaxSpeed);
 			this.addAgent(car);
+			car.init(env, this.getDt());
 			cars.add(car);
 		}
 		this.syncWithTime(nCyclesPerSec);
@@ -63,11 +64,18 @@ public class TrafficSimulationSingleRoadSeveralCars extends AbstractSimulation {
 
 	@Override
 	public void run(int nSteps) {
+		System.out.println("Running simulation for " + nSteps + " steps");
+		super.run(nSteps);
 		system.tell(new Start());
 	}
 
 	@Override
 	public void stop() {
-		system.tell(new Stop());
+		system.tell(new Pause());
+	}
+
+	@Override
+	public void start() {
+		system.tell(new Resume());
 	}
 }

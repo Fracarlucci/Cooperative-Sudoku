@@ -35,11 +35,14 @@ public class TrafficSimulationSingleRoadWithTrafficLightTwoCars extends Abstract
 
 		TrafficLight tl = env.createTrafficLight(new P2d(740,300), TrafficLight.TrafficLightState.GREEN, 75, 25, 100, this, dt);
 		r.addTrafficLight(tl, 740);
+		tl.init();
 
 		CarAgent car1 = new CarAgentExtended("car-1", env, r, 0, 0.1, 0.3, 6);
 		this.addAgent(car1);
+		car1.init(env, this.getDt());
 		CarAgent car2 = new CarAgentExtended("car-2", env, r, 100, 0.1, 0.3, 5);
 		this.addAgent(car2);
+		car2.init(env, this.getDt());
 
 		this.syncWithTime(nCyclesPerSec);
 		system = ActorSystem.create(ActorManager.create(this, env), "Environment");
@@ -47,11 +50,18 @@ public class TrafficSimulationSingleRoadWithTrafficLightTwoCars extends Abstract
 
 	@Override
 	public void run(int nSteps) {
+		System.out.println("Running simulation for " + nSteps + " steps");
+		super.run(nSteps);
 		system.tell(new Start());
 	}
 
 	@Override
 	public void stop() {
-		system.tell(new Stop());
+		system.tell(new Pause());
+	}
+
+	@Override
+	public void start() {
+		system.tell(new Resume());
 	}
 }
