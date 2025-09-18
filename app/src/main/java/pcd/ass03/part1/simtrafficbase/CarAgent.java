@@ -78,6 +78,6 @@ public abstract class CarAgent extends AbstractAgent {
   public void step() {
     this.senseAndDecide(getDt());
     System.out.println("Car " + this.getAgentId() + " sensed and decided.");
-    this.act();
+    // this.act();
   }
 }

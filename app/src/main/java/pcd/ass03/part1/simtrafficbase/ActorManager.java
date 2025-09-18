@@ -105,6 +105,7 @@ public class ActorManager extends AbstractBehavior<Message>{
             }
             startStepTime = System.currentTimeMillis();
             nStepsDone++;
+            simulation.notifyNewStep(t, env);
             System.out.println("STEPS: " + nStepsDone);
 
             // endcycleandwait

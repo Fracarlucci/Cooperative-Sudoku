@@ -55,7 +55,7 @@ public abstract class AbstractSimulation {
    */
   public void run(int numSteps) {
 
-    startWallTime = System.currentTimeMillis();
+    // startWallTime = System.currentTimeMillis();
 
     /* initialize the env and the agents inside */
     int t = t0;
@@ -66,10 +66,10 @@ public abstract class AbstractSimulation {
 
     this.notifyReset(t, agents, env);
 
-    long timePerStep = 0;
+    // long timePerStep = 0;
 
-    endWallTime = System.currentTimeMillis();
-    this.averageTimePerStep = timePerStep / numSteps;
+    // endWallTime = System.currentTimeMillis();
+    // this.averageTimePerStep = timePerStep / numSteps;
 
   }
 
