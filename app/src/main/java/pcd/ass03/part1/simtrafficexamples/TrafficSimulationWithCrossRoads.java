@@ -1,7 +1,5 @@
 package pcd.ass03.part1.simtrafficexamples;
 
-import java.util.Random;
-
 import pcd.ass03.part1.simengineseq.AbstractSimulation;
 import pcd.ass03.part1.simtrafficbase.*;
 import pcd.ass03.part1.simtrafficbase.messages.*;
