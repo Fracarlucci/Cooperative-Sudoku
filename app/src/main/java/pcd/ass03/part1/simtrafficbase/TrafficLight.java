@@ -30,13 +30,6 @@ public class TrafficLight {
 		currentTimeInState = 0;
 	}
 
-	// @Override
-	// public void run() {
-	// 	while(true) {
-	// 		this.semaphoreStep();
-	// 	}
-	// }
-
 	public void semaphoreStep() {
 		this.step(this.dt);
 	}
