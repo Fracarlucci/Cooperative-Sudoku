@@ -58,7 +58,6 @@ public class ActorManager extends AbstractBehavior<Message>{
     public Receive<Message> createReceive() {
       return newReceiveBuilder()
         .onMessage(Start.class, msg -> {
-          System.out.println("Starting simulation...");
           createCarActors();
           createTrafficLightActors();
           simulation.setCurrentWallTime();
@@ -69,6 +68,8 @@ public class ActorManager extends AbstractBehavior<Message>{
           }
           return this; 
         })
+        // Se ci sono i semafori, aspetto che siano pronti tutti
+        // prima di far decidere la prossima mossa alle macchine
         .onMessage(TrafficLightReady.class, msg -> {
           nTrafficLightsReadyToAct++;
           if (nTrafficLightsReadyToAct == this.trafficLights.size()) {
@@ -77,6 +78,7 @@ public class ActorManager extends AbstractBehavior<Message>{
           }
           return this;
         })
+        // Messaggio ricevuto dalle macchine quando hanno deciso la prossima mossa
         .onMessage(ActionReady.class, msg -> {
           nCarsReadyToAct++;
           if (nCarsReadyToAct == this.cars.size()) {
@@ -85,6 +87,7 @@ public class ActorManager extends AbstractBehavior<Message>{
           }
           return this;
         })
+        // Messaggio ricevuto dalle macchine quando hanno eseguito la mossa
         .onMessage(ActionDone.class, msg -> {
           nCarsDoneAction++;
           if (nCarsDoneAction >= this.cars.size() && !this.paused) {
@@ -92,7 +95,9 @@ public class ActorManager extends AbstractBehavior<Message>{
             nStepsDone++;
             simulation.stepCycle();
             System.out.println("STEPS: " + nStepsDone);
-
+            
+            // Se tutti gli step sono stati completati, la simulazione finisce
+            // altrimenti si ricomincia con un nuovo step
             if (nStepsDone >= env.getnSteps()) {
               this.simulation.stop();
               getContext().getSelf().tell(new Stop());
@@ -111,6 +116,8 @@ public class ActorManager extends AbstractBehavior<Message>{
           this.paused = true;
           return this;
         })
+        // Quando riceve un messaggio di resume
+        // si invia a se stesso un messaggio per far ripartire la simulazione
         .onMessage(Resume.class, msg -> {
           this.paused = false;
           getContext().getSelf().tell(new ActionDone(getContext().getSelf()));
