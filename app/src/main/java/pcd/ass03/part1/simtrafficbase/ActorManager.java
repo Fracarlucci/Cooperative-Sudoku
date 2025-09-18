@@ -12,6 +12,8 @@ import pcd.ass03.part1.simtrafficbase.messages.ActionDone;
 import pcd.ass03.part1.simtrafficbase.messages.ActionReady;
 import pcd.ass03.part1.simtrafficbase.messages.DoAction;
 import pcd.ass03.part1.simtrafficbase.messages.Message;
+import pcd.ass03.part1.simtrafficbase.messages.Pause;
+import pcd.ass03.part1.simtrafficbase.messages.Resume;
 import pcd.ass03.part1.simtrafficbase.messages.Start;
 import pcd.ass03.part1.simtrafficbase.messages.Step;
 import pcd.ass03.part1.simtrafficbase.messages.Stop;
@@ -28,6 +30,8 @@ public class ActorManager extends AbstractBehavior<Message>{
   private int nCarsDoneAction;
   private int nStepsDone;
   private long currentWallTime;
+
+  private boolean paused = false;
   
   int actualSteps = 0;
   long startWallTime = System.currentTimeMillis();
@@ -91,7 +95,7 @@ public class ActorManager extends AbstractBehavior<Message>{
         .onMessage(ActionDone.class, msg -> {
           System.out.println("Car done action: ");
           nCarsDoneAction++;
-          if (nCarsDoneAction == this.cars.size()) {
+          if (nCarsDoneAction >= this.cars.size() && !this.paused) {
             nCarsDoneAction = 0;
 
             if (startStepTime != 0) {
@@ -121,6 +125,16 @@ public class ActorManager extends AbstractBehavior<Message>{
               }
             }
           }
+          return this;
+        })
+        .onMessage(Pause.class, msg -> { 
+          this.paused = true;
+          return this;
+        })
+        .onMessage(Resume.class, msg -> {
+          this.paused = false;
+          System.out.println("Resuming simulation...");
+          getContext().getSelf().tell(new ActionDone(getContext().getSelf()));
           return this;
         })
         .onMessage(Stop.class, msg -> Behaviors.stopped())
