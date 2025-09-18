@@ -50,17 +50,21 @@ public class TrafficSimulationSingleRoadMassiveNumberOfCars extends AbstractSimu
 				cars.add(car);
 				
 				/* no sync with wall-time */
+				car.init(env, this.getDt());
 		}
 		system = ActorSystem.create(ActorManager.create(this, env), "Environment");
     }
 	
     @Override
     public void run(int nSteps) {
+		System.out.println("Running simulation for " + nSteps + " steps");
+		super.run(nSteps);
 		system.tell(new Start());
     }
 
 	@Override
 	public void stop() {
+		super.stop();
 		system.tell(new Stop());
 	}
 }

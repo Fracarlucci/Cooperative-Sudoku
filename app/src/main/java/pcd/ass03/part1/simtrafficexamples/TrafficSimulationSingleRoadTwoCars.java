@@ -25,7 +25,7 @@ public class TrafficSimulationSingleRoadTwoCars extends AbstractSimulation {
 
 		int nCyclesPerSec = 25;
 
-		this.setupTimings(0, this.getDt());
+		this.setupTimings(0, 1);
 
 		this.setupEnvironment(env);
 		Road r = env.createRoad(new P2d(0,300), new P2d(1500,300));
@@ -50,6 +50,7 @@ public class TrafficSimulationSingleRoadTwoCars extends AbstractSimulation {
 
 	@Override
 	public void stop() {
+		super.stop();
 		system.tell(new Stop());
 	}
 
