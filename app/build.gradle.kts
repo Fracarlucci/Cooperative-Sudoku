@@ -43,6 +43,9 @@ dependencies {
     // Akka
     implementation (platform("com.typesafe.akka:akka-bom_${versionScalaBinary}:2.9.5"))
 
+    // RabbitMQ
+    implementation("com.rabbitmq:amqp-client:5.26.0")
+
     implementation ("com.typesafe.akka:akka-actor-typed_${versionScalaBinary}")
     testImplementation ("com.typesafe.akka:akka-actor-testkit-typed_${versionScalaBinary}")
 }
