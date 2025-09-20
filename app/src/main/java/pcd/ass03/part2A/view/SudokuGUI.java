@@ -28,12 +28,9 @@ public class SudokuGUI extends JFrame {
     private SudokuGrid sudokuGrid;
     private Player currentPlayer;
     private JTextField[][] gridCells;
-    private JLabel statusLabel;
     private JLabel playerLabel;
-    private JLabel scoreLabel;
     private JButton newGameButton;
     private JButton clearCellButton;
-    private JButton solveButton;
     private JTextField playerNameField;
     private JButton joinButton;
     
@@ -60,10 +57,6 @@ public class SudokuGUI extends JFrame {
         // Panel centrale con la griglia Sudoku
         JPanel gridPanel = createGridPanel();
         add(gridPanel, BorderLayout.CENTER);
-        
-        // Panel inferiore con informazioni e controlli
-        JPanel bottomPanel = createBottomPanel();
-        add(bottomPanel, BorderLayout.SOUTH);
         
         // Panel laterale con controlli di gioco
         JPanel sidePanel = createSidePanel();
@@ -152,7 +145,6 @@ public class SudokuGUI extends JFrame {
                 char keyChar = e.getKeyChar();
                 if (currentPlayer == null) {
                     e.consume();
-                    showMessage("Devi prima entrare nel gioco!");
                     return;
                 }
                 
@@ -165,7 +157,6 @@ public class SudokuGUI extends JFrame {
                     } else {
                         e.consume();
                         currentPlayer.incrementInvalidMoves();
-                        showMessage("Mossa non valida!");
                         updatePlayerInfo();
                     }
                 } else if (keyChar == KeyEvent.VK_BACK_SPACE || keyChar == KeyEvent.VK_DELETE || keyChar == '0') {
@@ -179,21 +170,6 @@ public class SudokuGUI extends JFrame {
         });
         
         return cell;
-    }
-    
-    private JPanel createBottomPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        panel.setBackground(BACKGROUND_COLOR);
-        
-        statusLabel = new JLabel("Benvenuto al Cooperative Sudoku!", JLabel.CENTER);
-        statusLabel.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
-        panel.add(statusLabel);
-        
-        scoreLabel = new JLabel("Score: 0", JLabel.CENTER);
-        scoreLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
-        panel.add(scoreLabel);
-        
-        return panel;
     }
     
     private JPanel createSidePanel() {
@@ -217,31 +193,11 @@ public class SudokuGUI extends JFrame {
         clearCellButton.setEnabled(false);
         gbc.gridy = 1;
         panel.add(clearCellButton, gbc);
-        
-        solveButton = new JButton("Mostra Soluzione");
-        solveButton.addActionListener(e -> showSolution());
-        gbc.gridy = 2;
-        panel.add(solveButton, gbc);
-        
-        // Pannello con istruzioni
-        JTextArea instructions = new JTextArea(
-            "ISTRUZIONI:\n\n" +
-            "1. Inserisci il tuo nome e clicca 'Entra nel Gioco'\n\n" +
-            "2. Clicca su una cella per selezionarla\n\n" +
-            "3. Digita un numero (1-9) per inserirlo\n\n" +
-            "4. Usa BACKSPACE o '0' per cancellare\n\n" +
-            "5. Le celle selezionate da altri giocatori\n\n sono evidenziate"
-        );
-        instructions.setEditable(false);
-        instructions.setBackground(panel.getBackground());
-        instructions.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
-        instructions.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+                
         gbc.gridy = 3;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        panel.add(instructions, gbc);
-        
+                
         return panel;
     }
     
@@ -254,7 +210,6 @@ public class SudokuGUI extends JFrame {
     private void joinGame() {
         String playerName = playerNameField.getText().trim();
         if (playerName.isEmpty()) {
-            showMessage("Inserisci un nome valido!");
             return;
         }
         
@@ -271,7 +226,6 @@ public class SudokuGUI extends JFrame {
         joinButton.setText("Giocatore Connesso");
         joinButton.setEnabled(false);
         
-        showMessage("Benvenuto " + playerName + "! Puoi iniziare a giocare.");
     }
     
     private void selectCell(int row, int col) {
@@ -289,7 +243,6 @@ public class SudokuGUI extends JFrame {
         sudokuGrid.selectCell(currentPlayer.getPlayerId(), row, col);
         
         updateCellColors();
-        showMessage("Cella selezionata: (" + (row + 1) + "," + (col + 1) + ")");
     }
     
     private boolean setValue(int row, int col, int value) {
@@ -320,44 +273,6 @@ public class SudokuGUI extends JFrame {
             currentPlayer.resetStats();
             updatePlayerInfo();
         }
-        showMessage("Nuova partita iniziata!");
-    }
-    
-    private void showSolution() {
-        // Crea una griglia completa e la mostra (solo per debug/aiuto)
-        SudokuFactory factory = new SudokuFactory();
-        SudokuGrid solution = factory.generate(0); // Griglia completa
-        
-        JDialog dialog = new JDialog(this, "Esempio di Soluzione", true);
-        dialog.setLayout(new BorderLayout());
-        
-        JPanel solutionPanel = new JPanel(new GridLayout(9, 9, 1, 1));
-        solutionPanel.setBackground(GRID_COLOR);
-        solutionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        
-        Integer[][] solutionGrid = solution.getGrid();
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                JLabel cell = new JLabel(String.valueOf(solutionGrid[row][col]), JLabel.CENTER);
-                cell.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
-                cell.setPreferredSize(new Dimension(40, 40));
-                cell.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                cell.setOpaque(true);
-                cell.setBackground(Color.WHITE);
-                solutionPanel.add(cell);
-            }
-        }
-        
-        dialog.add(new JLabel("Esempio di Sudoku risolto:", JLabel.CENTER), BorderLayout.NORTH);
-        dialog.add(solutionPanel, BorderLayout.CENTER);
-        
-        JButton closeButton = new JButton("Chiudi");
-        closeButton.addActionListener(e -> dialog.dispose());
-        dialog.add(closeButton, BorderLayout.SOUTH);
-        
-        dialog.pack();
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
     }
     
     private void updateDisplay() {
@@ -406,30 +321,17 @@ public class SudokuGUI extends JFrame {
         if (currentPlayer != null) {
             playerLabel.setText("Giocatore: " + currentPlayer.getPlayerName() + 
                                " [" + currentPlayer.getPlayerId() + "]");
-            scoreLabel.setText(String.format("Score: %d (Risolte: %d, Errori: %d)", 
-                                            currentPlayer.getScore(), 
-                                            currentPlayer.getCellsSolved(), 
-                                            currentPlayer.getInvalidMoves()));
         }
     }
     
     private void checkWin() {
         if (sudokuGrid.isComplete()) {
-            showMessage("🎉 CONGRATULAZIONI! Sudoku completato! 🎉");
             JOptionPane.showMessageDialog(this, 
                 "Sudoku risolto con successo!\n" +
                 "Score finale: " + currentPlayer.getScore(),
                 "VITTORIA!", 
                 JOptionPane.INFORMATION_MESSAGE);
         }
-    }
-    
-    private void showMessage(String message) {
-        statusLabel.setText(message);
-        // Auto-clear del messaggio dopo 5 secondi
-        Timer timer = new Timer(5000, e -> statusLabel.setText("Pronto per giocare"));
-        timer.setRepeats(false);
-        timer.start();
     }
     
     public static void main(String[] args) {
