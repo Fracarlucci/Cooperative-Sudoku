@@ -128,7 +128,7 @@ public class Player {
         StringBuilder sb = new StringBuilder();
         sb.append("Player{")
           .append("id='").append(playerId).append('\'')
-          .append(", name='").append(playerName).append('\'')
+          .append(", name='").append(playerName).append('\'');
         
         if (currentGridId != null) {
             sb.append(", grid='").append(currentGridId).append('\'');
