@@ -28,7 +28,7 @@ public class SudokuGrid {
     /** Imposta un valore in una cella, se valido */
     public boolean setValue(int row, int col, int value) {
         if (value < 1 || value > 9) {
-            throw new IllegalArgumentException("Il valore deve essere tra 1 e 9");
+            return false; // valore non valido
         }
         if (!isValidMove(row, col, value)) {
             return false; // mossa non valida
