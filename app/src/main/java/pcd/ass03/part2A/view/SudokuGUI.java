@@ -156,7 +156,6 @@ public class SudokuGUI extends JFrame {
                         checkWin();
                     } else {
                         e.consume();
-                        currentPlayer.incrementInvalidMoves();
                         updatePlayerInfo();
                     }
                 } else if (keyChar == KeyEvent.VK_BACK_SPACE || keyChar == KeyEvent.VK_DELETE || keyChar == '0') {
@@ -197,7 +196,7 @@ public class SudokuGUI extends JFrame {
         gbc.gridy = 3;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-                
+
         return panel;
     }
     
@@ -247,7 +246,6 @@ public class SudokuGUI extends JFrame {
     
     private boolean setValue(int row, int col, int value) {
         if (sudokuGrid.setValue(row, col, value)) {
-            currentPlayer.incrementCellsSolved();
             return true;
         }
         return false;
@@ -270,7 +268,6 @@ public class SudokuGUI extends JFrame {
     private void newGame() {
         initializeGame();
         if (currentPlayer != null) {
-            currentPlayer.resetStats();
             updatePlayerInfo();
         }
     }
@@ -327,8 +324,7 @@ public class SudokuGUI extends JFrame {
     private void checkWin() {
         if (sudokuGrid.isComplete()) {
             JOptionPane.showMessageDialog(this, 
-                "Sudoku risolto con successo!\n" +
-                "Score finale: " + currentPlayer.getScore(),
+                "Sudoku risolto con successo!\n",
                 "VITTORIA!", 
                 JOptionPane.INFORMATION_MESSAGE);
         }

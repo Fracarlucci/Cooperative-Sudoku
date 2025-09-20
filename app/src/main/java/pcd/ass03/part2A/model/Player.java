@@ -18,10 +18,6 @@ public class Player {
     private volatile int selectedRow = -1; // cella attualmente selezionata
     private volatile int selectedCol = -1;
     
-    // Statistiche del giocatore
-    private volatile int cellsSolved = 0;
-    private volatile int invalidMoves = 0;
-    
     /**
      * Crea un nuovo giocatore con nome specificato
      */
@@ -77,14 +73,6 @@ public class Player {
         return selectedCol;
     }
     
-    public int getCellsSolved() {
-        return cellsSolved;
-    }
-    
-    public int getInvalidMoves() {
-        return invalidMoves;
-    }
-    
     /**
      * Controlla se il giocatore ha una cella selezionata
      */
@@ -126,34 +114,12 @@ public class Player {
         this.selectedCol = -1;
     }
     
-    // Metodi per aggiornare le statistiche
-    public void incrementCellsSolved() {
-        this.cellsSolved++;
-    }
-    
-    public void incrementInvalidMoves() {
-        this.invalidMoves++;
-    }
-    
-    public void resetStats() {
-        this.cellsSolved = 0;
-        this.invalidMoves = 0;
-    }
-    
-    /**
-     * Calcola il punteggio del giocatore
-     */
-    public int getScore() {
-        return Math.max(0, cellsSolved * 10 - invalidMoves * 2);
-    }
-    
     /**
      * Restituisce informazioni formattate sul giocatore
      */
     public String getPlayerInfo() {
         return String.format("Player[%s] %s - Score: %d (Solved: %d, Invalid: %d) %s", 
-            playerId, playerName, getScore(), cellsSolved, invalidMoves,
-            isActive ? "[ACTIVE]" : "[INACTIVE]");
+            playerId, playerName, isActive ? "[ACTIVE]" : "[INACTIVE]");
     }
     
     @Override
@@ -185,48 +151,6 @@ public class Player {
             sb.append(", selected=(").append(selectedRow).append(",").append(selectedCol).append(")");
         }
         
-        sb.append(", score=").append(getScore())
-          .append('}');
-        
         return sb.toString();
-    }
-    
-    /**
-     * Crea una copia del giocatore per la serializzazione/comunicazione
-     */
-    public PlayerInfo toPlayerInfo() {
-        return new PlayerInfo(playerId, playerName, isActive, currentGridId, 
-                            selectedRow, selectedCol, cellsSolved, invalidMoves);
-    }
-    
-    /**
-     * Classe interna per trasferire informazioni del giocatore
-     */
-    public static class PlayerInfo {
-        public final String playerId;
-        public final String playerName;
-        public final boolean isActive;
-        public final String currentGridId;
-        public final int selectedRow;
-        public final int selectedCol;
-        public final int cellsSolved;
-        public final int invalidMoves;
-        
-        public PlayerInfo(String playerId, String playerName, boolean isActive, 
-                         String currentGridId, int selectedRow, int selectedCol, 
-                         int cellsSolved, int invalidMoves) {
-            this.playerId = playerId;
-            this.playerName = playerName;
-            this.isActive = isActive;
-            this.currentGridId = currentGridId;
-            this.selectedRow = selectedRow;
-            this.selectedCol = selectedCol;
-            this.cellsSolved = cellsSolved;
-            this.invalidMoves = invalidMoves;
-        }
-        
-        public int getScore() {
-            return Math.max(0, cellsSolved * 10 - invalidMoves * 2);
-        }
     }
 }
