@@ -13,14 +13,9 @@ public class Player {
     private final String playerId;
     private final String playerName;
     private final long joinTimestamp;
-    private volatile boolean isActive;
     private volatile String currentGridId; // ID della griglia a cui sta partecipando
     private volatile int selectedRow = -1; // cella attualmente selezionata
     private volatile int selectedCol = -1;
-    
-    // Statistiche del giocatore
-    private volatile int cellsSolved = 0;
-    private volatile int invalidMoves = 0;
     
     /**
      * Crea un nuovo giocatore con nome specificato
@@ -33,7 +28,6 @@ public class Player {
         this.playerId = "player_" + ID_GENERATOR.incrementAndGet();
         this.playerName = playerName.trim();
         this.joinTimestamp = System.currentTimeMillis();
-        this.isActive = true;
         this.currentGridId = null;
     }
     
@@ -44,7 +38,6 @@ public class Player {
         this.playerId = playerId;
         this.playerName = playerName;
         this.joinTimestamp = System.currentTimeMillis();
-        this.isActive = true;
         this.currentGridId = null;
     }
     
@@ -61,10 +54,6 @@ public class Player {
         return joinTimestamp;
     }
     
-    public boolean isActive() {
-        return isActive;
-    }
-    
     public String getCurrentGridId() {
         return currentGridId;
     }
@@ -75,14 +64,6 @@ public class Player {
     
     public int getSelectedCol() {
         return selectedCol;
-    }
-    
-    public int getCellsSolved() {
-        return cellsSolved;
-    }
-    
-    public int getInvalidMoves() {
-        return invalidMoves;
     }
     
     /**
@@ -98,12 +79,7 @@ public class Player {
     public boolean isInGame() {
         return currentGridId != null;
     }
-    
-    // Setters per lo stato del giocatore
-    public void setActive(boolean active) {
-        this.isActive = active;
-    }
-    
+
     public void joinGrid(String gridId) {
         this.currentGridId = gridId;
     }
@@ -130,9 +106,8 @@ public class Player {
      * Restituisce informazioni formattate sul giocatore
      */
     public String getPlayerInfo() {
-        return String.format("Player[%s] %s - Score: %d (Solved: %d, Invalid: %d) %s", 
-            playerId, playerName, cellsSolved, invalidMoves,
-            isActive ? "[ACTIVE]" : "[INACTIVE]");
+        return String.format("Player[%s] %s", 
+            playerId, playerName);
     }
     
     @Override
@@ -154,7 +129,6 @@ public class Player {
         sb.append("Player{")
           .append("id='").append(playerId).append('\'')
           .append(", name='").append(playerName).append('\'')
-          .append(", active=").append(isActive);
         
         if (currentGridId != null) {
             sb.append(", grid='").append(currentGridId).append('\'');
@@ -165,44 +139,5 @@ public class Player {
         }
         
         return sb.toString();
-    }
-    
-    /**
-     * Crea una copia del giocatore per la serializzazione/comunicazione
-     */
-    public PlayerInfo toPlayerInfo() {
-        return new PlayerInfo(playerId, playerName, isActive, currentGridId, 
-                            selectedRow, selectedCol, cellsSolved, invalidMoves);
-    }
-    
-    /**
-     * Classe interna per trasferire informazioni del giocatore
-     */
-    public static class PlayerInfo {
-        public final String playerId;
-        public final String playerName;
-        public final boolean isActive;
-        public final String currentGridId;
-        public final int selectedRow;
-        public final int selectedCol;
-        public final int cellsSolved;
-        public final int invalidMoves;
-        
-        public PlayerInfo(String playerId, String playerName, boolean isActive, 
-                         String currentGridId, int selectedRow, int selectedCol, 
-                         int cellsSolved, int invalidMoves) {
-            this.playerId = playerId;
-            this.playerName = playerName;
-            this.isActive = isActive;
-            this.currentGridId = currentGridId;
-            this.selectedRow = selectedRow;
-            this.selectedCol = selectedCol;
-            this.cellsSolved = cellsSolved;
-            this.invalidMoves = invalidMoves;
-        }
-        
-        public int getScore() {
-            return Math.max(0, cellsSolved * 10 - invalidMoves * 2);
-        }
     }
 }

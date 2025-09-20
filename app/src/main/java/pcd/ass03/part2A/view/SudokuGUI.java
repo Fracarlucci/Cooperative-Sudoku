@@ -6,7 +6,6 @@ import pcd.ass03.part2A.model.SudokuGrid;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -38,7 +37,6 @@ public class SudokuGUI extends JFrame {
     private DefaultListModel<String> gamesListModel;
     private JButton createGameButton;
     private JButton joinGameButton;
-    private JButton refreshButton;
     private List<GameInfo> availableGames;
     
     // Schermata di Gioco
@@ -456,8 +454,6 @@ public class SudokuGUI extends JFrame {
         gbc.gridy = 3;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        panel.add(gameInfo, gbc);
-        
         return panel;
     }
     
@@ -523,7 +519,17 @@ public class SudokuGUI extends JFrame {
     
     private void updateGameDisplay() {
         if (sudokuGrid == null || gridCells == null) return;
+        updateDisplay();
+    }
         
+    // private void newGame() {
+    //     initializeGame();
+    //     if (currentPlayer != null) {
+    //         updatePlayerInfo();
+    //     }
+    // }
+    
+    private void updateDisplay() {
         Integer[][] grid = sudokuGrid.getGrid();
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
