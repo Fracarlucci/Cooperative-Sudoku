@@ -126,33 +126,12 @@ public class Player {
         this.selectedCol = -1;
     }
     
-    // Metodi per aggiornare le statistiche
-    public void incrementCellsSolved() {
-        this.cellsSolved++;
-    }
-    
-    public void incrementInvalidMoves() {
-        this.invalidMoves++;
-    }
-    
-    public void resetStats() {
-        this.cellsSolved = 0;
-        this.invalidMoves = 0;
-    }
-    
-    /**
-     * Calcola il punteggio del giocatore
-     */
-    public int getScore() {
-        return Math.max(0, cellsSolved * 10 - invalidMoves * 2);
-    }
-    
     /**
      * Restituisce informazioni formattate sul giocatore
      */
     public String getPlayerInfo() {
         return String.format("Player[%s] %s - Score: %d (Solved: %d, Invalid: %d) %s", 
-            playerId, playerName, getScore(), cellsSolved, invalidMoves,
+            playerId, playerName, cellsSolved, invalidMoves,
             isActive ? "[ACTIVE]" : "[INACTIVE]");
     }
     
@@ -184,9 +163,6 @@ public class Player {
         if (hasSelection()) {
             sb.append(", selected=(").append(selectedRow).append(",").append(selectedCol).append(")");
         }
-        
-        sb.append(", score=").append(getScore())
-          .append('}');
         
         return sb.toString();
     }
