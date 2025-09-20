@@ -8,7 +8,7 @@ import java.util.Random;
 public class SudokuFactory {
    /** Genera un Sudoku completo e poi rimuove celle per creare un puzzle */
   private static final int SIZE = 9;
-  private static final int SUBGRID = 3;
+  private int counter = 0;
  
   public SudokuGrid generate(int emptyCells) {
         
@@ -30,10 +30,9 @@ public class SudokuFactory {
           }
       }
 
-      return new SudokuGrid(puzzle);
+      return new SudokuGrid(puzzle, counter++);
   }
 
-  /** Riempi la griglia con un Sudoku valido (ricorsione/backtracking) */
   private boolean fillGrid(SudokuGrid sudoku) {
       Integer[][] grid = sudoku.getGrid();
       for (int row = 0; row < SIZE; row++) {
@@ -57,7 +56,7 @@ public class SudokuFactory {
               }
           }
       }
-      return true; // griglia piena
+      return true;
   }
 
   /** Crea una copia profonda della griglia */

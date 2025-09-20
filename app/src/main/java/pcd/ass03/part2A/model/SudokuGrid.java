@@ -8,21 +8,23 @@ import java.util.Objects;
 import java.util.Set;
 
 public class SudokuGrid {
+    private final int id;
     private final Integer[][] cells = new Integer[9][9];
     private final Map<String, Set<String>> selections = new HashMap<>(); 
-    // selections: playerId -> insieme di celle selezionate ("r,c")
 
     /** Crea una nuova griglia vuota */
     public SudokuGrid() {
         for (int r = 0; r < 9; r++) {
             Arrays.fill(cells[r], null);
         }
+        this.id = -1;
     }
 
-    public SudokuGrid(Integer[][] initial) {
+    public SudokuGrid(Integer[][] initial, int id) {
         for (int r = 0; r < 9; r++) {
             System.arraycopy(initial[r], 0, cells[r], 0, 9);
         }
+        this.id = id;
     }
 
     /** Imposta un valore in una cella, se valido */
@@ -106,17 +108,21 @@ public class SudokuGrid {
         return cells;
     }
 
-  public static void main(String[] args) {
-    SudokuFactory factory = new SudokuFactory();
-    SudokuGrid grid = factory.generate(70);
-    System.out.println(grid);
+    public int getId() {
+        return id;
+    }
 
-    grid.setValue(0, 0, 5);
-    grid.setValue(0, 1, 3);
-    System.out.println(grid);
+//   public static void main(String[] args) {
+//     SudokuFactory factory = new SudokuFactory();
+//     SudokuGrid grid = factory.generate(70);
+//     System.out.println(grid);
 
-    grid.selectCell("Alice", 0, 2);
-    grid.selectCell("Bob", 1, 1);
-    System.out.println(grid);
-  }
+//     grid.setValue(0, 0, 5);
+//     grid.setValue(0, 1, 3);
+//     System.out.println(grid);
+
+//     grid.selectCell("Alice", 0, 2);
+//     grid.selectCell("Bob", 1, 1);
+//     System.out.println(grid);
+//   }
 }
