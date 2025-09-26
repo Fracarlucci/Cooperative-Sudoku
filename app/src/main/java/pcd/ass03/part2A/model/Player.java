@@ -1,7 +1,20 @@
 package pcd.ass03.part2A.model;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+
+import pcd.ass03.part2A.utils.MessageUtils;
+
 
 /**
  * Rappresenta un giocatore nel sistema Cooperative Sudoku distribuito.
@@ -10,48 +23,69 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Player {
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
     
+    private final List<SudokuGrid> sudokus = new ArrayList<>();
+    private Channel channel;
     private final String playerId;
     private final String playerName;
-    private final long joinTimestamp;
-    private volatile String currentGridId; // ID della griglia a cui sta partecipando
-    private volatile int selectedRow = -1; // cella attualmente selezionata
+    private volatile String currentGridId;
+    private volatile int selectedRow = -1;
     private volatile int selectedCol = -1;
     
-    /**
-     * Crea un nuovo giocatore con nome specificato
-     */
-    public Player(String playerName) {
+    public Player(String playerName) throws IOException, TimeoutException {
         if (playerName == null || playerName.trim().isEmpty()) {
             throw new IllegalArgumentException("Il nome del giocatore non può essere vuoto");
         }
         
         this.playerId = "player_" + ID_GENERATOR.incrementAndGet();
         this.playerName = playerName.trim();
-        this.joinTimestamp = System.currentTimeMillis();
         this.currentGridId = null;
+
+        this.setupConnection();
+
     }
-    
-    /**
-     * Crea un giocatore con ID specificato (utile per la deserializzazione)
-     */
-    public Player(String playerId, String playerName) {
+
+    public Player(String playerId, String playerName) throws IOException, TimeoutException {
         this.playerId = playerId;
         this.playerName = playerName;
-        this.joinTimestamp = System.currentTimeMillis();
         this.currentGridId = null;
+        
+        this.setupConnection();
+
+        channel.exchangeDeclare(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "fanout");
+        channel.exchangeDeclare(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "fanout");
+        channel.exchangeDeclare(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "fanout");
+
+        String queueName = channel.queueDeclare().getQueue();
+
+        channel.queueBind(queueName, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
+        channel.basicConsume(queueName, true, addSudokuCallBack(), t -> {});
+
+        // channel.queueBind(queueName, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
+        // channel.basicConsume(queueName, true, selectCellCallBack(), t -> {});
+
+        // channel.queueBind(queueName, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
+        // channel.basicConsume(queueName, true, setValueCallBack(), t -> {});
+
+    }
+
+    private DeliverCallback addSudokuCallBack() {
+        return (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            SudokuGrid receivedSudoku = MessageUtils.deserializeSudokuGrid(message);
+
+            if (sudokus.stream().noneMatch(grid -> grid.getId() == (receivedSudoku.getId()))) {
+                sudokus.add(receivedSudoku);
+                // notifyGridCreated(); // updateView
+            }
+        };
     }
     
-    // Getters
     public String getPlayerId() {
         return playerId;
     }
     
     public String getPlayerName() {
         return playerName;
-    }
-    
-    public long getJoinTimestamp() {
-        return joinTimestamp;
     }
     
     public String getCurrentGridId() {
@@ -66,16 +100,10 @@ public class Player {
         return selectedCol;
     }
     
-    /**
-     * Controlla se il giocatore ha una cella selezionata
-     */
     public boolean hasSelection() {
         return selectedRow >= 0 && selectedCol >= 0;
     }
     
-    /**
-     * Controlla se il giocatore sta partecipando a una griglia
-     */
     public boolean isInGame() {
         return currentGridId != null;
     }
@@ -102,27 +130,6 @@ public class Player {
         this.selectedCol = -1;
     }
     
-    /**
-     * Restituisce informazioni formattate sul giocatore
-     */
-    public String getPlayerInfo() {
-        return String.format("Player[%s] %s", 
-            playerId, playerName);
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Player player = (Player) obj;
-        return Objects.equals(playerId, player.playerId);
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(playerId);
-    }
-    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -139,5 +146,12 @@ public class Player {
         }
         
         return sb.toString();
+    }
+
+    private void setupConnection() throws IOException, TimeoutException {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        Connection connection = factory.newConnection();
+        this.channel = connection.createChannel();
     }
 }
