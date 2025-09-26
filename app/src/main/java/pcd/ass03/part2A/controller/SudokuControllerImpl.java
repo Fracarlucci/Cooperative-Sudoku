@@ -6,10 +6,12 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public boolean selectCell(Player player, int row, int col) {
+    return false;
   }
 
   @Override
   public boolean setCellValue(Player player, int value) {
+    return false;
   }
 
   @Override

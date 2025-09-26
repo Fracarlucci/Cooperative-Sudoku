@@ -13,7 +13,6 @@ public class Player {
     private final String playerId;
     private final String playerName;
     private final long joinTimestamp;
-    private volatile boolean isActive;
     private volatile String currentGridId; // ID della griglia a cui sta partecipando
     private volatile int selectedRow = -1; // cella attualmente selezionata
     private volatile int selectedCol = -1;
@@ -29,7 +28,6 @@ public class Player {
         this.playerId = "player_" + ID_GENERATOR.incrementAndGet();
         this.playerName = playerName.trim();
         this.joinTimestamp = System.currentTimeMillis();
-        this.isActive = true;
         this.currentGridId = null;
     }
     
@@ -40,7 +38,6 @@ public class Player {
         this.playerId = playerId;
         this.playerName = playerName;
         this.joinTimestamp = System.currentTimeMillis();
-        this.isActive = true;
         this.currentGridId = null;
     }
     
@@ -55,10 +52,6 @@ public class Player {
     
     public long getJoinTimestamp() {
         return joinTimestamp;
-    }
-    
-    public boolean isActive() {
-        return isActive;
     }
     
     public String getCurrentGridId() {
@@ -86,12 +79,7 @@ public class Player {
     public boolean isInGame() {
         return currentGridId != null;
     }
-    
-    // Setters per lo stato del giocatore
-    public void setActive(boolean active) {
-        this.isActive = active;
-    }
-    
+
     public void joinGrid(String gridId) {
         this.currentGridId = gridId;
     }
@@ -118,8 +106,8 @@ public class Player {
      * Restituisce informazioni formattate sul giocatore
      */
     public String getPlayerInfo() {
-        return String.format("Player[%s] %s - Score: %d (Solved: %d, Invalid: %d) %s", 
-            playerId, playerName, isActive ? "[ACTIVE]" : "[INACTIVE]");
+        return String.format("Player[%s] %s", 
+            playerId, playerName);
     }
     
     @Override
@@ -140,8 +128,7 @@ public class Player {
         StringBuilder sb = new StringBuilder();
         sb.append("Player{")
           .append("id='").append(playerId).append('\'')
-          .append(", name='").append(playerName).append('\'')
-          .append(", active=").append(isActive);
+          .append(", name='").append(playerName).append('\'');
         
         if (currentGridId != null) {
             sb.append(", grid='").append(currentGridId).append('\'');
