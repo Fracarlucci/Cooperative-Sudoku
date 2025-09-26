@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -181,6 +180,10 @@ public class Player {
     public void leaveGrid() {
         this.currentGridId = null;
         clearSelection();
+    }
+
+    public List<Integer> getSudokusId() {
+        return sudokus.stream().map(SudokuGrid::getId).toList();
     }
     
     public void selectCell(int row, int col) throws NumberFormatException, IOException {
