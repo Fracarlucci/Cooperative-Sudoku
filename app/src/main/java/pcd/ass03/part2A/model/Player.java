@@ -15,6 +15,7 @@ import com.rabbitmq.client.DeliverCallback;
 
 import pcd.ass03.part2A.model.message.SelectCellMessage;
 import pcd.ass03.part2A.model.message.SetValueMessage;
+import pcd.ass03.part2A.model.message.UnselectCellMessage;
 import pcd.ass03.part2A.utils.MessageUtils;
 
 
@@ -56,6 +57,7 @@ public class Player {
 
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "fanout");
+        channel.exchangeDeclare(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "fanout");
 
         String queueName = channel.queueDeclare().getQueue();
@@ -65,6 +67,9 @@ public class Player {
 
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
         channel.basicConsume(queueName, true, selectCellCallBack(), t -> {});
+
+        channel.queueBind(queueName, ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "");
+        channel.basicConsume(queueName, true, unselectCellCallBack(), t -> {});
 
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
         channel.basicConsume(queueName, true, setValueCallBack(), t -> {});
@@ -87,6 +92,14 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
+            // notifyCellSelected(); // updateView
+        };
+    }
+
+    private DeliverCallback unselectCellCallBack() {
+        return (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
             // notifyCellSelected(); // updateView
         };
     }
@@ -209,7 +222,7 @@ public class Player {
     // }
 
     public void selectCell(int gridId, int row, int col) throws IOException {
-        String message = gridId + " " + row + " " + col + " " + color + " " + playerId;
+        String message = gridId + " " + playerId + " " + row + " " + col + " " + color;
         setupConnectionIfNeeded();
         channel.basicPublish(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }

@@ -3,6 +3,7 @@ package pcd.ass03.part2A.utils;
 import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
 import pcd.ass03.part2A.model.message.SetValueMessage;
+import pcd.ass03.part2A.model.message.UnselectCellMessage;
 
 public class MessageUtils {
 
@@ -27,9 +28,20 @@ public class MessageUtils {
     String playerId = elements[1];
     int row = Integer.parseInt(elements[2]);
     int col = Integer.parseInt(elements[3]);
+    String color = elements[4];
 
-    return new SelectCellMessage(sudokuId, playerId, row, col);
+    return new SelectCellMessage(sudokuId, playerId, row, col, color);
   }
+
+  public static UnselectCellMessage deserializeUnselectCellMessage(String message) {
+    String[] elements = message.split(" ");
+    int sudokuId = Integer.parseInt(elements[0]);
+    int row = Integer.parseInt(elements[2]);
+    int col = Integer.parseInt(elements[3]);
+
+    return new UnselectCellMessage(sudokuId, row, col);
+  }
+  
 
   public static SetValueMessage deserializeSetValueMessage(String message) {
     String[] elements = message.split(" ");
