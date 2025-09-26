@@ -9,8 +9,10 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,7 +165,13 @@ public class SudokuGUI extends JFrame {
         
         joinGameButton = new JButton("Entra");
         joinGameButton.setPreferredSize(new Dimension(80, 35));
-        joinGameButton.addActionListener(e -> joinSelectedGame());
+        joinGameButton.addActionListener(e -> {
+            try {
+                joinSelectedGame();
+            } catch (IOException | TimeoutException e1) {
+                e1.printStackTrace();
+            }
+        });
         panel.add(joinGameButton);
         
         return panel;
@@ -209,7 +217,11 @@ public class SudokuGUI extends JFrame {
                 return;
             }
             
-            createAndJoinGame(gameName, playerName);
+            try {
+                createAndJoinGame(gameName, playerName);
+            } catch (IOException | TimeoutException e1) {
+                e1.printStackTrace();
+            }
             dialog.dispose();
         });
         
@@ -224,7 +236,7 @@ public class SudokuGUI extends JFrame {
         dialog.setVisible(true);
     }
     
-    private void createAndJoinGame(String gameName, String playerName) {
+    private void createAndJoinGame(String gameName, String playerName) throws IOException, TimeoutException {
         // Crea il giocatore
         currentPlayer = new Player(playerName);
         playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
@@ -250,7 +262,7 @@ public class SudokuGUI extends JFrame {
         switchToGameScreen();
     }
     
-    private void joinSelectedGame() {
+    private void joinSelectedGame() throws IOException, TimeoutException {
         String playerName = playerNameField.getText().trim();
         if (playerName.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Inserisci il tuo nome prima di entrare in una partita!");
@@ -486,7 +498,11 @@ public class SudokuGUI extends JFrame {
         }
         
         // Seleziona la nuova cella
-        currentPlayer.selectCell(row, col);
+        try {
+            currentPlayer.selectCell(row, col);
+        } catch (NumberFormatException | IOException e) {
+            e.printStackTrace();
+        }
         sudokuGrid.selectCell(currentPlayer.getPlayerId(), row, col);
         
         updateCellColors();
