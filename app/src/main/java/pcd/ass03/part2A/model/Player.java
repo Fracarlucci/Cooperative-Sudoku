@@ -210,7 +210,7 @@ public class Player {
     }
 
     public void createSudoku(SudokuGrid grid) throws IOException {
-        String message = grid.getId() + " " + MessageUtils.serializeSudokuGrid(grid.getGrid());
+        String message = grid.getId() + " " + MessageUtils.serializeSudokuGrid(grid.getId(), grid.getGrid());
         setupConnectionIfNeeded();
         channel.basicPublish(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
