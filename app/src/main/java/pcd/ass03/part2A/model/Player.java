@@ -29,6 +29,7 @@ public class Player {
     private Channel channel;
     private final String playerId;
     private final String playerName;
+    private final String color = String.format("#%06x", (int)(Math.random() * 0xFFFFFF));
     private volatile String currentGridId;
     private volatile int selectedRow = -1;
     private volatile int selectedCol = -1;
@@ -145,12 +146,14 @@ public class Player {
         clearSelection();
     }
     
-    public void selectCell(int row, int col) {
+    public void selectCell(int row, int col) throws NumberFormatException, IOException {
         if (row < 0 || row >= 9 || col < 0 || col >= 9) {
             throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
         }
+        unselectCell(Integer.parseInt(this.currentGridId), this.selectedRow, this.selectedCol);
         this.selectedRow = row;
         this.selectedCol = col;
+        selectCell(Integer.parseInt(this.currentGridId), row, col);
     }
     
     public void clearSelection() {
@@ -182,4 +185,39 @@ public class Player {
         Connection connection = factory.newConnection();
         this.channel = connection.createChannel();
     }
+    
+    private void setupConnectionIfNeeded() throws IOException {
+        try {
+            if (channel == null || !channel.isOpen()) {
+                setupConnection();
+            }
+        } catch (TimeoutException e) {
+            throw new IOException("Failed to setup connection", e);
+        }
+    }
+
+    public void createSudoku(SudokuGrid grid) throws IOException {
+        String message = grid.getId() + " " + MessageUtils.serializeSudokuGrid(grid.getGrid());
+        setupConnectionIfNeeded();
+        channel.basicPublish(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+    }
+
+    // public void updateGrid(int gridId, int row, int col, int value) throws IOException {
+    //     String message = gridId + " " + row + " " + col + " " + value;
+    //     setupConnectionIfNeeded();
+    //     channel.basicPublish(ChannelsEnum.CHANNEL_UPDATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+    // }
+
+    public void selectCell(int gridId, int row, int col) throws IOException {
+        String message = gridId + " " + row + " " + col + " " + color + " " + playerId;
+        setupConnectionIfNeeded();
+        channel.basicPublish(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void unselectCell(int gridId, int row, int col) throws IOException {
+        String message = gridId + " " + row + " " + col;
+        setupConnectionIfNeeded();
+        channel.basicPublish(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+    }
+
 }

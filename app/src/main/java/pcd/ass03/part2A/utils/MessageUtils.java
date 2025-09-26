@@ -41,4 +41,14 @@ public class MessageUtils {
 
     return new SetValueMessage(sudokuId, playerId, row, col, cellValue);
   }
+
+  public static String serializeSudokuGrid(Integer[][] grid) {
+    StringBuilder sb = new StringBuilder();
+    for (int row = 0; row < 9; row++) {
+        for (int col = 0; col < 9; col++) {
+            sb.append(grid[row][col]).append(" ");
+        }
+    }
+    return sb.toString().trim();
+  }
 }
