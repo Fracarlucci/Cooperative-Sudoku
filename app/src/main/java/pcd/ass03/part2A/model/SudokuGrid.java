@@ -39,6 +39,10 @@ public class SudokuGrid {
         return true;
     }
 
+    public void cancelValue(int row, int col) {
+        cells[row][col] = null;
+    }
+
     /** Rimuove un valore da una cella */
     public void clearValue(int row, int col) {
         cells[row][col] = null;
@@ -46,11 +50,9 @@ public class SudokuGrid {
 
     /** Controlla se inserire value in (row,col) rispetta le regole del Sudoku */
     public boolean isValidMove(int row, int col, int value) {
-        // stessa riga
         for (int c = 0; c < 9; c++) {
             if (Objects.equals(cells[row][c], value)) return false;
         }
-        // stessa colonna
         for (int r = 0; r < 9; r++) {
             if (Objects.equals(cells[r][col], value)) return false;
         }
@@ -111,18 +113,4 @@ public class SudokuGrid {
     public int getId() {
         return id;
     }
-
-//   public static void main(String[] args) {
-//     SudokuFactory factory = new SudokuFactory();
-//     SudokuGrid grid = factory.generate(70);
-//     System.out.println(grid);
-
-//     grid.setValue(0, 0, 5);
-//     grid.setValue(0, 1, 3);
-//     System.out.println(grid);
-
-//     grid.selectCell("Alice", 0, 2);
-//     grid.selectCell("Bob", 1, 1);
-//     System.out.println(grid);
-//   }
 }
