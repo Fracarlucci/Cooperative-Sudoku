@@ -13,6 +13,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
+import pcd.ass03.part2A.model.message.SelectCellMessage;
+import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.utils.MessageUtils;
 
 
@@ -60,11 +62,11 @@ public class Player {
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
         channel.basicConsume(queueName, true, addSudokuCallBack(), t -> {});
 
-        // channel.queueBind(queueName, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
-        // channel.basicConsume(queueName, true, selectCellCallBack(), t -> {});
+        channel.queueBind(queueName, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
+        channel.basicConsume(queueName, true, selectCellCallBack(), t -> {});
 
-        // channel.queueBind(queueName, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
-        // channel.basicConsume(queueName, true, setValueCallBack(), t -> {});
+        channel.queueBind(queueName, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
+        channel.basicConsume(queueName, true, setValueCallBack(), t -> {});
 
     }
 
@@ -77,6 +79,32 @@ public class Player {
                 sudokus.add(receivedSudoku);
                 // notifyGridCreated(); // updateView
             }
+        };
+    }
+
+    private DeliverCallback selectCellCallBack() {
+        return (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
+            // notifyCellSelected(); // updateView
+        };
+    }
+
+    private DeliverCallback setValueCallBack() {
+        return (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            SetValueMessage setValueMessage = MessageUtils.deserializeSetValueMessage(message);
+
+            sudokus.stream()
+                   .filter(grid -> grid.getId() == setValueMessage.sudokuId())
+                   .findFirst()
+                   .ifPresent(grid -> {
+                        if (setValueMessage.value().equals("")) {
+                            grid.cancelValue(setValueMessage.row(), setValueMessage.col());
+                        } else
+                       grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
+                       // notifyCellValueSet(); // updateView
+                   });
         };
     }
     
