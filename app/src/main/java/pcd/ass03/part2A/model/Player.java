@@ -34,7 +34,7 @@ public class Player {
     private volatile int selectedRow = -1;
     private volatile int selectedCol = -1;
     
-    public Player(String playerName) throws IOException, TimeoutException {
+    public Player(String playerName) throws IOException, TimeoutException, InterruptedException {
         if (playerName == null || playerName.trim().isEmpty()) {
             throw new IllegalArgumentException("Il nome del giocatore non può essere vuoto");
         }
@@ -44,23 +44,28 @@ public class Player {
         this.currentGridId = null;
 
         this.setupConnection();
-
+        this.setupExchangesAndConsumers();
     }
 
-    public Player(String playerId, String playerName) throws IOException, TimeoutException {
+    public Player(String playerId, String playerName) throws IOException, TimeoutException, InterruptedException {
         this.playerId = playerId;
         this.playerName = playerName;
         this.currentGridId = null;
         
         this.setupConnection();
+        this.setupExchangesAndConsumers();
+    }
 
+    private void setupExchangesAndConsumers() throws IOException, InterruptedException {
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "fanout");
 
+        // Crea una coda temporanea per questo player
         String queueName = channel.queueDeclare().getQueue();
 
+        // Bind la coda a tutti gli exchange e imposta i consumer
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
         channel.basicConsume(queueName, true, addSudokuCallBack(), t -> {});
 
@@ -73,40 +78,52 @@ public class Player {
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
         channel.basicConsume(queueName, true, setValueCallBack(), t -> {});
 
+        Thread.sleep(100);
+        
+        System.out.println("Player " + playerName + " (" + playerId + ") ready with consumers active");
     }
 
     public void createSudoku(SudokuGrid grid) throws IOException {
+        sudokus.add(grid);
         String message = grid.getId() + " " + MessageUtils.serializeSudokuGrid(grid.getId(), grid.getGrid());
+        
+        System.out.println("Publishing sudoku " + grid.getId() + " by player " + playerName);
+        
         setupConnectionIfNeeded();
-        channel.basicPublish(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
-    }
 
-    // public void updateGrid(int gridId, int row, int col, int value) throws IOException {
-    //     String message = gridId + " " + row + " " + col + " " + value;
-    //     setupConnectionIfNeeded();
-    //     channel.basicPublish(ChannelsEnum.CHANNEL_UPDATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
-    // }
+        channel.basicPublish(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+        
+        System.out.println("Sudoku published successfully");
+    }
 
     public void selectCell(int gridId, int row, int col) throws IOException {
         String message = gridId + " " + playerId + " " + row + " " + col + " " + color;
         setupConnectionIfNeeded();
+
         channel.basicPublish(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
     public void unselectCell(int gridId, int row, int col) throws IOException {
         String message = gridId + " " + row + " " + col;
         setupConnectionIfNeeded();
+
         channel.basicPublish(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
     private DeliverCallback addSudokuCallBack() {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            System.out.println("Player " + playerName + " received message: " + message);
+            
             SudokuGrid receivedSudoku = MessageUtils.deserializeSudokuGrid(message);
-
+            System.out.println("Player " + playerName + " received new Sudoku with ID: " + receivedSudoku.getId());
+            
             if (sudokus.stream().noneMatch(grid -> grid.getId() == (receivedSudoku.getId()))) {
                 sudokus.add(receivedSudoku);
+                System.out.println("Sudoku " + receivedSudoku.getId() + " added to player " + playerName);
                 // notifyGridCreated(); // updateView
+            } else {
+                System.out.println("Sudoku " + receivedSudoku.getId() + " already exists for player " + playerName);
             }
         };
     }
@@ -115,6 +132,7 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
+            System.out.println("Player " + playerName + " received cell selection: " + message);
             // notifyCellSelected(); // updateView
         };
     }
@@ -123,6 +141,7 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
+            System.out.println("Player " + playerName + " received cell unselection: " + message);
             // notifyCellSelected(); // updateView
         };
     }
@@ -131,6 +150,7 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SetValueMessage setValueMessage = MessageUtils.deserializeSetValueMessage(message);
+            System.out.println("Player " + playerName + " received value set: " + message);
 
             sudokus.stream()
                    .filter(grid -> grid.getId() == setValueMessage.sudokuId())
@@ -138,9 +158,10 @@ public class Player {
                    .ifPresent(grid -> {
                         if (setValueMessage.value().equals("")) {
                             grid.cancelValue(setValueMessage.row(), setValueMessage.col());
-                        } else
-                       grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
-                       // notifyCellValueSet(); // updateView
+                        } else {
+                            grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
+                        }
+                        // notifyCellValueSet(); // updateView
                    });
         };
     }
@@ -230,8 +251,10 @@ public class Player {
         try {
             if (channel == null || !channel.isOpen()) {
                 setupConnection();
+                // Se ricreiamo la connessione, dobbiamo ricreare anche gli exchange e consumer
+                setupExchangesAndConsumers();
             }
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | InterruptedException e) {
             throw new IOException("Failed to setup connection", e);
         }
     }

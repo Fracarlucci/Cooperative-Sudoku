@@ -238,7 +238,12 @@ public class SudokuGUI extends JFrame {
     
     private void createAndJoinGame(String gameName, String playerName) throws IOException, TimeoutException {
         // Crea il giocatore
-        currentPlayer = new Player(playerName);
+        try {
+            currentPlayer = new Player("", playerName);
+        } catch (IOException | TimeoutException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
         colorIndex++;
         
@@ -278,7 +283,12 @@ public class SudokuGUI extends JFrame {
         GameInfo selectedGame = availableGames.get(selectedIndex);
         
         // Crea il giocatore
-        currentPlayer = new Player(playerName);
+        try {
+            currentPlayer = new Player("", playerName);
+        } catch (IOException | TimeoutException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
         colorIndex++;
         
