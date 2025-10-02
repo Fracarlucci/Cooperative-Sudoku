@@ -62,10 +62,8 @@ public class Player {
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "fanout");
 
-        // Crea una coda temporanea per questo player
         String queueName = channel.queueDeclare().getQueue();
 
-        // Bind la coda a tutti gli exchange e imposta i consumer
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
         channel.basicConsume(queueName, true, addSudokuCallBack(), t -> {});
 
@@ -108,6 +106,13 @@ public class Player {
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void setValue(int gridId, int row, int col, Integer value) throws IOException {
+        String message = gridId + " " + playerId + " " + row + " " + col + " " + (value == null ? "" : value.toString()) + " " + color;
+        setupConnectionIfNeeded();
+
+        channel.basicPublish(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
     private DeliverCallback addSudokuCallBack() {
@@ -206,6 +211,30 @@ public class Player {
     public List<Integer> getSudokusId() {
         return sudokus.stream().map(SudokuGrid::getId).toList();
     }
+
+    public boolean tryToSetValue(int row, int col, int value) {
+        if (currentGridId == null) {
+            throw new IllegalStateException("Player is not in a game");
+        }
+        SudokuGrid currentGrid = sudokus.stream()
+                                        .filter(grid -> Integer.toString(grid.getId()).equals(currentGridId))
+                                        .findFirst()
+                                        .orElseThrow(() -> new IllegalStateException("Current grid not found"));
+        try {
+            if (row != this.selectedRow || col != this.selectedCol) {
+                throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
+            }
+            if (currentGrid.setValue(row, col, value)) {
+                this.setValue(Integer.parseInt(this.currentGridId), row, col, value);
+                return true;
+            }
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }                        
+        
+    }
     
     public void selectCell(int row, int col) throws NumberFormatException, IOException {
         if (row < 0 || row >= 9 || col < 0 || col >= 9) {
@@ -216,8 +245,18 @@ public class Player {
         this.selectedCol = col;
         selectCell(Integer.parseInt(this.currentGridId), row, col);
     }
+
+    public void unselectCell(int row, int col) throws NumberFormatException, IOException {
+        if (row > 0 || col > 0) {
+            throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
+        }
+        unselectCell(Integer.parseInt(this.currentGridId), row, col);
+        // TODO se si mette il messaggio nel clearSelection qui va modificato
+        clearSelection();
+    }
     
     public void clearSelection() {
+        // TODO forse è da mandare una unselect
         this.selectedRow = -1;
         this.selectedCol = -1;
     }
