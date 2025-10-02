@@ -7,6 +7,9 @@ import pcd.ass03.part2A.model.Cell;
 import pcd.ass03.part2A.model.Player;
 import pcd.ass03.part2A.model.SudokuFactory;
 import pcd.ass03.part2A.model.SudokuGrid;
+import pcd.ass03.part2A.model.message.SelectCellMessage;
+import pcd.ass03.part2A.model.message.SetValueMessage;
+import pcd.ass03.part2A.model.message.UnselectCellMessage;
 
 public class SudokuControllerImpl implements SudokuController {
 
@@ -32,10 +35,13 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public void updateView() {
+    // TODO chiamerà la updateView della GUI qualcosa come
+    // view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId());
   }
 
   @Override
   public boolean selectCell(int row, int col) {
+    int gridId = Integer.parseInt(player.getCurrentGridId());
     try {
       if (row == -1 || col == -1) {
         Cell previouslySelected = selectedCells.remove(player.getPlayerId());
@@ -44,10 +50,10 @@ public class SudokuControllerImpl implements SudokuController {
         }
         return true;
       }
-      if (isAlreadySelectedCell(new Cell(row, col))) {
+      if (isAlreadySelectedCell(new Cell(row, col, gridId))) {
         return false;
       }
-      selectedCells.put(player.getPlayerId(), new Cell(row, col));
+      selectedCells.put(player.getPlayerId(), new Cell(row, col, gridId));
       player.selectCell(row, col);
       return true;
     } catch (Exception e) {
@@ -73,6 +79,28 @@ public class SudokuControllerImpl implements SudokuController {
   @Override
   public void leaveGame() {
     player.leaveGrid();
+  }
+
+  @Override
+  public void notifyCellSelected(SelectCellMessage msg) {
+    selectedCells.put(msg.playerId(), new Cell(msg.row(), msg.col(), msg.sudokuId()));
+    this.updateView();
+  }
+
+  @Override
+  public void notifyCellUnselected(String playerId) {
+    selectedCells.remove(playerId);
+    this.updateView();
+  }
+  
+  @Override
+  public void notifyCellValueChanged(SetValueMessage msg) {
+    this.updateView();
+  }
+  
+  @Override
+  public void notifySudokuCreated(SudokuGrid sudokuId) {
+    this.updateView();
   }
 
   private boolean isAlreadySelectedCell(Cell cell) {

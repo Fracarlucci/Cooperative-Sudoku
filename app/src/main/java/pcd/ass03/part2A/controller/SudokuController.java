@@ -1,6 +1,8 @@
 package pcd.ass03.part2A.controller;
 
-import pcd.ass03.part2A.model.Player;
+import pcd.ass03.part2A.model.SudokuGrid;
+import pcd.ass03.part2A.model.message.SelectCellMessage;
+import pcd.ass03.part2A.model.message.SetValueMessage;
 
 public interface SudokuController {
   public boolean selectCell(int row, int col);
@@ -10,4 +12,8 @@ public interface SudokuController {
   public void leaveGame();
   public void newGame();
   public void updateView();
+  public void notifyCellSelected(SelectCellMessage msg);
+  public void notifyCellUnselected(String playerId);
+  public void notifyCellValueChanged(SetValueMessage msg);
+  public void notifySudokuCreated(SudokuGrid sudokuId);
 }
