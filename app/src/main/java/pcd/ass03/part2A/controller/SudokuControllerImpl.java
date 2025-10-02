@@ -10,13 +10,14 @@ import pcd.ass03.part2A.model.SudokuGrid;
 
 public class SudokuControllerImpl implements SudokuController {
 
-  private Player player;
-  private SudokuFactory factory;
-  private Map<String, Cell> selectedCells = new HashMap<>();
+  private final Player player;
+  private final SudokuFactory factory;
+  private final Map<String, Cell> selectedCells;
 
   public SudokuControllerImpl(Player player) {
     this.player = player;
     this.factory = new SudokuFactory();
+    this.selectedCells = new HashMap<>();
   }
 
   @Override
