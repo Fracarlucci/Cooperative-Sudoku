@@ -1,6 +1,8 @@
 package pcd.ass03.part2A.view;
 
 import pcd.ass03.part2A.controller.SudokuController;
+import pcd.ass03.part2A.controller.SudokuControllerImpl;
+import pcd.ass03.part2A.model.Cell;
 import pcd.ass03.part2A.model.PlayerInfo;
 import pcd.ass03.part2A.model.SudokuGrid;
 
@@ -14,7 +16,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SudokuGUI extends JFrame {
+public class SudokuGUI extends JFrame implements SudokuView {
     private static final int GRID_SIZE = 9;
     private static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
     private static final Color GRID_COLOR = new Color(120, 120, 120);
@@ -59,8 +61,13 @@ public class SudokuGUI extends JFrame {
         this.controller = controller;
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         this.selectedGridId = -1;
+        
+        // Imposta questa GUI come view nel controller
+        if (controller instanceof SudokuControllerImpl) {
+            ((SudokuControllerImpl) controller).setView(this);
+        }
+        
         initializeGUI();
-        createSampleGames();
     }
     
     private void initializeGUI() {
@@ -170,7 +177,8 @@ public class SudokuGUI extends JFrame {
         joinGameButton = new JButton("Entra");
         joinGameButton.setPreferredSize(new Dimension(80, 35));
         joinGameButton.addActionListener(e -> {
-            joinSelectedGame();
+            int selectedIndex = gamesList.getSelectedIndex();
+            joinSelectedGame(selectedIndex);
         });
         panel.add(joinGameButton);
         
@@ -239,7 +247,6 @@ public class SudokuGUI extends JFrame {
         
         sudokuGrid = controller.newGame();
 
-        
         GameInfo newGame = new GameInfo(
             sudokuGrid.getId(),
             gameName,
@@ -249,15 +256,16 @@ public class SudokuGUI extends JFrame {
         
         availableGames.add(newGame);
         currentGame = newGame;
+        this.selectedGridId = sudokuGrid.getId();
         this.controller.joinGame(sudokuGrid.getId());
         
         // Passa alla schermata di gioco
         switchToGameScreen();
     }
-    
-    private void joinSelectedGame() {
-        String playerName = this.currentPlayerInfo.playerName();
-        int selectedIndex = this.selectedGridId;
+
+    private void joinSelectedGame(int selectedIndex) {
+        // String playerName = this.currentPlayerInfo.playerName();
+        this.selectedGridId = selectedIndex;
         if (this.selectedGridId == -1) {
             JOptionPane.showMessageDialog(this, "Seleziona una partita dalla lista!");
             return;
@@ -283,22 +291,13 @@ public class SudokuGUI extends JFrame {
         cardLayout.show(mainPanel, "GAME");
     }
     
-    private void refreshGamesList() {
+    public void refreshGamesList() {
         gamesListModel.clear();
         
         for (GameInfo game : availableGames) {
             String status = game.isComplete ? "[COMPLETATA]" : "[" + game.playerCount + " giocatori]";
             gamesListModel.addElement(game.gameName + " " + status);
         }
-    }
-    
-    private void createSampleGames() {
-        availableGames.add(new GameInfo(1, "Partita Principianti", 25, 2));
-        availableGames.add(new GameInfo(2, "Sfida Serale", 40, 1));
-        availableGames.add(new GameInfo(3, "Puzzle Difficile", 55, 3));
-        availableGames.add(new GameInfo(4, "Partita Completata", 35, 2));
-
-        refreshGamesList();
     }
     
     private JPanel createGamePanel() {
@@ -538,7 +537,8 @@ public class SudokuGUI extends JFrame {
             int row = currentPlayerInfo.selectedRow();
             int col = currentPlayerInfo.selectedCol();
             Color playerColor = playerColors.get(currentPlayerInfo.playerId());
-            if (playerColor != null) {
+            System.out.println(row + " " + col);
+            if (playerColor != null && (row >= 0 && col >= 0 && row < GRID_SIZE && col < GRID_SIZE)) {
                 gridCells[row][col].setBackground(playerColor);
             }
         }
@@ -564,8 +564,55 @@ public class SudokuGUI extends JFrame {
         }
     }
 
-    private void updateView() {
-        // TODO da fare
+    @Override
+    public void updateView(int currentGridId, Map<String, Cell> selectedCells, List<Integer> availableSudokusId) {
+        // Aggiorna le informazioni del giocatore
+        this.currentPlayerInfo = controller.getCurrentPlayerInfo();
+        updatePlayerInfo();
+        
+        // Aggiorna la griglia se siamo in gioco
+        if (currentGridId != -1 && sudokuGrid != null && sudokuGrid.getId() == currentGridId) {
+            updateGameDisplay();
+            
+            // Aggiorna i colori delle celle selezionate
+            updateCellSelections(selectedCells);
+        }
+        
+        // Aggiorna la lista dei giochi disponibili se siamo nella lobby
+        refreshGamesList();
+    }
+    
+    /**
+     * Aggiorna i colori delle celle per mostrare le selezioni dei vari giocatori
+     */
+    private void updateCellSelections(Map<String, Cell> selectedCells) {
+        if (gridCells == null || sudokuGrid == null) return;
+        
+        // Reset colori per tutte le celle editabili
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                if (sudokuGrid.getGrid()[row][col] == null) {
+                    gridCells[row][col].setBackground(Color.WHITE);
+                }
+            }
+        }
+        
+        // Applica i colori per le celle selezionate
+        for (Map.Entry<String, Cell> entry : selectedCells.entrySet()) {
+            String playerId = entry.getKey();
+            Cell cell = entry.getValue();
+            
+            // Verifica che la cella sia nella griglia corrente
+            if (cell.sudokuId() == sudokuGrid.getId() && 
+                cell.row() >= 0 && cell.row() < GRID_SIZE && 
+                cell.col() >= 0 && cell.col() < GRID_SIZE) {
+                
+                Color playerColor = playerColors.get(playerId);
+                if (playerColor != null) {
+                    gridCells[cell.row()][cell.col()].setBackground(playerColor);
+                }
+            }
+        }
     }
     
     private static class GameInfo {
@@ -582,5 +629,10 @@ public class SudokuGUI extends JFrame {
             this.difficulty = difficulty;
             this.playerCount = playerCount;
         }
+    }
+
+    @Override
+    public void addGame(int id) {
+        this.availableGames.add(new GameInfo(id, "Partita " + id, 40, 1));
     }
 }
