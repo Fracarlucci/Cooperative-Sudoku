@@ -14,16 +14,16 @@ public class MessageUtils {
     int index = 1;
     try
     {
-    for (int row = 0; row < 9; row++) {
-        for (int col = 0; col < 9; col++) {
-            if (elements[index].equals("null")) {
-                grid[row][col] = null;
-            } else {
-                grid[row][col] = Integer.parseInt(elements[index]);
-            }
-            index++;
-        }
-    }
+      for (int row = 0; row < 9; row++) {
+          for (int col = 0; col < 9; col++) {
+              if (elements[index].equals("null")) {
+                  grid[row][col] = null;
+              } else {
+                  grid[row][col] = Integer.parseInt(elements[index]);
+              }
+              index++;
+          }
+      }
     } 
     catch (Exception e) 
     {
