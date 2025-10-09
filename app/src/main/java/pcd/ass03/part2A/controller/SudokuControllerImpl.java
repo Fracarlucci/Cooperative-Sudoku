@@ -11,17 +11,28 @@ import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
 import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.model.message.UnselectCellMessage;
+import pcd.ass03.part2A.view.SudokuView;
 
 public class SudokuControllerImpl implements SudokuController {
 
   private final Player player;
   private final SudokuFactory factory;
   private final Map<String, Cell> selectedCells;
+  private SudokuView view;
 
   public SudokuControllerImpl(Player player) {
     this.player = player;
     this.factory = new SudokuFactory();
     this.selectedCells = new HashMap<>();
+    this.view = null;
+  }
+
+  /**
+   * Imposta la view da aggiornare
+   * @param view la view del Sudoku
+   */
+  public void setView(SudokuView view) {
+    this.view = view;
   }
 
   @Override
@@ -38,8 +49,9 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public void updateView() {
-    // TODO chiamerà la updateView della GUI qualcosa come
-    // view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId());
+    if (view != null) {
+      view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId());
+    }
   }
 
   @Override
@@ -104,6 +116,7 @@ public class SudokuControllerImpl implements SudokuController {
   
   @Override
   public void notifySudokuCreated(SudokuGrid sudokuId) {
+    view.addGame(sudokuId.getId());
     this.updateView();
   }
 
