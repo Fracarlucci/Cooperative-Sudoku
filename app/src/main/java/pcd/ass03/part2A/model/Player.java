@@ -30,7 +30,7 @@ public class Player {
     private final String playerId;
     private final String playerName;
     private final String color = String.format("#%06x", (int)(Math.random() * 0xFFFFFF));
-    private volatile String currentGridId;
+    private volatile int currentGridId;
     private volatile int selectedRow = -1;
     private volatile int selectedCol = -1;
     
@@ -41,7 +41,7 @@ public class Player {
         
         this.playerId = "player_" + ID_GENERATOR.incrementAndGet();
         this.playerName = playerName.trim();
-        this.currentGridId = null;
+        this.currentGridId = -1;
 
         this.setupConnection();
         this.setupExchangesAndConsumers();
@@ -50,7 +50,7 @@ public class Player {
     public Player(String playerId, String playerName) throws IOException, TimeoutException, InterruptedException {
         this.playerId = playerId;
         this.playerName = playerName;
-        this.currentGridId = null;
+        this.currentGridId = -1;
         
         this.setupConnection();
         this.setupExchangesAndConsumers();
@@ -62,45 +62,54 @@ public class Player {
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "fanout");
 
-        // Crea una coda temporanea per questo player
-        String queueName = channel.queueDeclare().getQueue();
+        String sudokuQueue = channel.queueDeclare().getQueue();
+        channel.queueBind(sudokuQueue, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
+        channel.basicConsume(sudokuQueue, true, addSudokuCallBack(), t -> {});
 
-        // Bind la coda a tutti gli exchange e imposta i consumer
-        channel.queueBind(queueName, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
-        channel.basicConsume(queueName, true, addSudokuCallBack(), t -> {});
+        String selectQueue = channel.queueDeclare().getQueue();
+        channel.queueBind(selectQueue, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
+        channel.basicConsume(selectQueue, true, selectCellCallBack(), t -> {});
 
-        channel.queueBind(queueName, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
-        channel.basicConsume(queueName, true, selectCellCallBack(), t -> {});
+        String unselectQueue = channel.queueDeclare().getQueue();
+        channel.queueBind(unselectQueue, ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "");
+        channel.basicConsume(unselectQueue, true, unselectCellCallBack(), t -> {});
 
-        channel.queueBind(queueName, ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "");
-        channel.basicConsume(queueName, true, unselectCellCallBack(), t -> {});
-
-        channel.queueBind(queueName, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
-        channel.basicConsume(queueName, true, setValueCallBack(), t -> {});
+        String setValueQueue = channel.queueDeclare().getQueue();
+        channel.queueBind(setValueQueue, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
+        channel.basicConsume(setValueQueue, true, setValueCallBack(), t -> {});
 
         Thread.sleep(100);
-        
-        System.out.println("Player " + playerName + " (" + playerId + ") ready with consumers active");
     }
 
     public void createSudoku(SudokuGrid grid) throws IOException {
         sudokus.add(grid);
-        String message = grid.getId() + " " + MessageUtils.serializeSudokuGrid(grid.getId(), grid.getGrid());
+        String message = MessageUtils.serializeSudokuGrid(grid.getId(), grid.getGrid());
         
         System.out.println("Publishing sudoku " + grid.getId() + " by player " + playerName);
         
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
-        
-        System.out.println("Sudoku published successfully");
     }
 
     public void selectCell(int gridId, int row, int col) throws IOException {
         String message = gridId + " " + playerId + " " + row + " " + col + " " + color;
         setupConnectionIfNeeded();
-
         channel.basicPublish(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void setValue(int value) throws IOException {
+        if (currentGridId == -1) {
+            throw new IllegalStateException("Nessuna griglia selezionata");
+        }
+        if (selectedRow < 0 || selectedCol < 0) {
+            throw new IllegalStateException("Nessuna cella selezionata");
+        }
+        String valueStr = (value < 1 || value > 9) ? "" : String.valueOf(value);
+        String message = currentGridId + " " + playerId + " " + selectedRow + " " + selectedCol + " " + valueStr;
+        setupConnectionIfNeeded();
+
+        channel.basicPublish(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
     public void unselectCell(int gridId, int row, int col) throws IOException {
@@ -113,17 +122,12 @@ public class Player {
     private DeliverCallback addSudokuCallBack() {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-            System.out.println("Player " + playerName + " received message: " + message);
             
             SudokuGrid receivedSudoku = MessageUtils.deserializeSudokuGrid(message);
-            System.out.println("Player " + playerName + " received new Sudoku with ID: " + receivedSudoku.getId());
             
             if (sudokus.stream().noneMatch(grid -> grid.getId() == (receivedSudoku.getId()))) {
                 sudokus.add(receivedSudoku);
-                System.out.println("Sudoku " + receivedSudoku.getId() + " added to player " + playerName);
                 // notifyGridCreated(); // updateView
-            } else {
-                System.out.println("Sudoku " + receivedSudoku.getId() + " already exists for player " + playerName);
             }
         };
     }
@@ -139,10 +143,14 @@ public class Player {
 
     private DeliverCallback unselectCellCallBack() {
         return (consumerTag, delivery) -> {
+            try{
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
             System.out.println("Player " + playerName + " received cell unselection: " + message);
             // notifyCellSelected(); // updateView
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         };
     }
 
@@ -153,16 +161,16 @@ public class Player {
             System.out.println("Player " + playerName + " received value set: " + message);
 
             sudokus.stream()
-                   .filter(grid -> grid.getId() == setValueMessage.sudokuId())
-                   .findFirst()
-                   .ifPresent(grid -> {
-                        if (setValueMessage.value().equals("")) {
-                            grid.cancelValue(setValueMessage.row(), setValueMessage.col());
-                        } else {
-                            grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
-                        }
-                        // notifyCellValueSet(); // updateView
-                   });
+                .filter(grid -> grid.getId() == setValueMessage.sudokuId())
+                .findFirst()
+                .ifPresent(grid -> {
+                    if (setValueMessage.value().equals("")) {
+                        grid.cancelValue(setValueMessage.row(), setValueMessage.col());
+                    } else {
+                        grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
+                    }
+                    // notifyCellValueSet(); // updateView
+                });
         };
     }
     
@@ -174,10 +182,10 @@ public class Player {
         return playerName;
     }
     
-    public String getCurrentGridId() {
+    public int getCurrentGridId() {
         return currentGridId;
     }
-    
+
     public int getSelectedRow() {
         return selectedRow;
     }
@@ -191,15 +199,15 @@ public class Player {
     }
     
     public boolean isInGame() {
-        return currentGridId != null;
+        return currentGridId != -1;
     }
 
-    public void joinGrid(String gridId) {
+    public void joinGrid(int gridId) {
         this.currentGridId = gridId;
     }
     
     public void leaveGrid() {
-        this.currentGridId = null;
+        this.currentGridId = -1;
         clearSelection();
     }
 
@@ -211,10 +219,12 @@ public class Player {
         if (row < 0 || row >= 9 || col < 0 || col >= 9) {
             throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
         }
-        unselectCell(Integer.parseInt(this.currentGridId), this.selectedRow, this.selectedCol);
+        if (this.selectedCol >= 0 && this.selectedRow >= 0) {
+            unselectCell(this.currentGridId, this.selectedRow, this.selectedCol);
+        }
         this.selectedRow = row;
         this.selectedCol = col;
-        selectCell(Integer.parseInt(this.currentGridId), row, col);
+        selectCell(this.currentGridId, row, col);
     }
     
     public void clearSelection() {
@@ -229,7 +239,7 @@ public class Player {
           .append("id='").append(playerId).append('\'')
           .append(", name='").append(playerName).append('\'');
         
-        if (currentGridId != null) {
+        if (currentGridId != -1) {
             sb.append(", grid='").append(currentGridId).append('\'');
         }
         

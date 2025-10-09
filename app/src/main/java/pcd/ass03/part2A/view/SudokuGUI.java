@@ -253,7 +253,7 @@ public class SudokuGUI extends JFrame {
         sudokuGrid = factory.generate(difficulty);
         
         GameInfo newGame = new GameInfo(
-            "game_" + System.currentTimeMillis(),
+            5,
             gameName,
             difficulty,
             1
@@ -323,11 +323,11 @@ public class SudokuGUI extends JFrame {
     }
     
     private void createSampleGames() {
-        availableGames.add(new GameInfo("game_001", "Partita Principianti", 25, 2));
-        availableGames.add(new GameInfo("game_002", "Sfida Serale", 40, 1));
-        availableGames.add(new GameInfo("game_003", "Puzzle Difficile", 55, 3));
-        availableGames.add(new GameInfo("game_004", "Partita Completata", 35, 2));
-        
+        availableGames.add(new GameInfo(1, "Partita Principianti", 25, 2));
+        availableGames.add(new GameInfo(2, "Sfida Serale", 40, 1));
+        availableGames.add(new GameInfo(3, "Puzzle Difficile", 55, 3));
+        availableGames.add(new GameInfo(4, "Partita Completata", 35, 2));
+
         refreshGamesList();
     }
     
@@ -616,13 +616,13 @@ public class SudokuGUI extends JFrame {
     }
     
     private static class GameInfo {
-        public final String gameId;
+        public final int gameId;
         public final String gameName;
         public final int difficulty;
         public int playerCount;
         public boolean isComplete;
         
-        public GameInfo(String gameId, String gameName, int difficulty, 
+        public GameInfo(int gameId, String gameName, int difficulty, 
                        int playerCount) {
             this.gameId = gameId;
             this.gameName = gameName;

@@ -12,13 +12,24 @@ public class MessageUtils {
     int sudokuId = Integer.parseInt(elements[0]);
     Integer[][] grid = new Integer[9][9];
     int index = 1;
+    try
+    {
     for (int row = 0; row < 9; row++) {
         for (int col = 0; col < 9; col++) {
-            grid[row][col] = Integer.parseInt(elements[index]);
+            if (elements[index].equals("null")) {
+                grid[row][col] = null;
+            } else {
+                grid[row][col] = Integer.parseInt(elements[index]);
+            }
             index++;
         }
     }
-
+    } 
+    catch (Exception e) 
+    {
+      System.out.println("Deserialized SudokuGrid with ID: " + sudokuId);
+        e.printStackTrace();
+    }
     return new SudokuGrid(grid, sudokuId);
   }
 
@@ -36,8 +47,8 @@ public class MessageUtils {
   public static UnselectCellMessage deserializeUnselectCellMessage(String message) {
     String[] elements = message.split(" ");
     int sudokuId = Integer.parseInt(elements[0]);
-    int row = Integer.parseInt(elements[2]);
-    int col = Integer.parseInt(elements[3]);
+    int row = Integer.parseInt(elements[1]);
+    int col = Integer.parseInt(elements[2]);
 
     return new UnselectCellMessage(sudokuId, row, col);
   }

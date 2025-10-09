@@ -27,6 +27,13 @@ public class Main {
         
         System.out.println("Sudoku 1 ID: " + p1.getSudokusId());
         System.out.println("Sudoku 2 ID: " + p2.getSudokusId());
+
+        p1.joinGrid(sudoku1.getId());
+        p1.selectCell(1, 1);
+        p2.joinGrid(sudoku2.getId());
+        p2.selectCell(4, 7);
+        p1.setValue(5);
+        p1.selectCell(3, 3);
         
     } catch (Exception e) {
         e.printStackTrace();
