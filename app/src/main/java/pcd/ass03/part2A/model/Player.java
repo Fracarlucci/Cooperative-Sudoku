@@ -12,6 +12,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
+import pcd.ass03.part2A.controller.SudokuController;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
 import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.model.message.UnselectCellMessage;
@@ -33,6 +34,8 @@ public class Player {
     private volatile int currentGridId;
     private volatile int selectedRow = -1;
     private volatile int selectedCol = -1;
+
+    private SudokuController controller;
     
     public Player(String playerName) throws IOException, TimeoutException, InterruptedException {
         if (playerName == null || playerName.trim().isEmpty()) {
@@ -66,6 +69,10 @@ public class Player {
 
         channel.queueBind(queueName, ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "");
         channel.basicConsume(queueName, true, addSudokuCallBack(), t -> {});
+
+        String selectQueue = channel.queueDeclare().getQueue();
+        channel.queueBind(selectQueue, ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "");
+        channel.basicConsume(selectQueue, true, selectCellCallBack(), t -> {});
 
         String unselectQueue = channel.queueDeclare().getQueue();
         channel.queueBind(unselectQueue, ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "");
@@ -126,12 +133,11 @@ public class Player {
     private DeliverCallback addSudokuCallBack() {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-            
             SudokuGrid receivedSudoku = MessageUtils.deserializeSudokuGrid(message);
             
-            if (sudokus.stream().noneMatch(grid -> grid.getId() == (receivedSudoku.getId()))) {
+            if (sudokus.isEmpty() || sudokus.stream().noneMatch(grid -> grid.getId() == (receivedSudoku.getId()))) {
                 sudokus.add(receivedSudoku);
-                // notifyGridCreated(); // updateView
+                controller.notifySudokuCreated(receivedSudoku);
             }
         };
     }
@@ -142,19 +148,14 @@ public class Player {
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
             System.out.println("Player " + playerName + " received cell selection: " + message);
             // notifyCellSelected(); // updateView
+            controller.selectCell(selectCellMessage.row(), selectCellMessage.col());
         };
     }
 
     private DeliverCallback unselectCellCallBack() {
         return (consumerTag, delivery) -> {
-            try{
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
-            System.out.println("Player " + playerName + " received cell unselection: " + message);
-            // notifyCellSelected(); // updateView
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         };
     }
 
@@ -174,6 +175,9 @@ public class Player {
                         grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
                     }
                     // notifyCellValueSet(); // updateView
+                    this.tryToSetValue(selectedRow, selectedCol, currentGridId);
+                    controller.updateView();
+                    
                 });
         };
     }
@@ -207,6 +211,7 @@ public class Player {
     }
 
     public void joinGrid(int gridId) {
+        System.out.println("Player " + playerName + " joining grid " + gridId);
         this.currentGridId = gridId;
     }
     
@@ -225,7 +230,7 @@ public class Player {
 
     public PlayerInfo getPlayerInfo() {
         return new PlayerInfo(playerId, playerName, isInGame(), 
-                              Integer.toString(currentGridId), selectedRow, selectedCol);
+                              currentGridId, selectedRow, selectedCol);
     }
 
     public boolean tryToSetValue(int row, int col, int value) {
@@ -233,7 +238,7 @@ public class Player {
             throw new IllegalStateException("Player is not in a game");
         }
         SudokuGrid currentGrid = sudokus.stream()
-                                        .filter(grid -> Integer.toString(grid.getId()).equals(currentGridId))
+                                        .filter(grid -> grid.getId() == currentGridId)
                                         .findFirst()
                                         .orElseThrow(() -> new IllegalStateException("Current grid not found"));
         try {
@@ -314,5 +319,9 @@ public class Player {
         } catch (TimeoutException | InterruptedException e) {
             throw new IOException("Failed to setup connection", e);
         }
+    }
+
+    public void setController(SudokuController controller) {
+        this.controller = controller;
     }
 }
