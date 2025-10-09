@@ -41,7 +41,7 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public boolean selectCell(int row, int col) {
-    int gridId = Integer.parseInt(player.getCurrentGridId());
+    int gridId = player.getCurrentGridId();
     try {
       if (row == -1 || col == -1) {
         Cell previouslySelected = selectedCells.remove(player.getPlayerId());
@@ -72,7 +72,7 @@ public class SudokuControllerImpl implements SudokuController {
   }
 
   @Override
-  public void joinGame(String sudokuId) {
+  public void joinGame(int sudokuId) {
     player.joinGrid(sudokuId);
   }
 

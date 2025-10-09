@@ -220,7 +220,7 @@ public class Player {
     }
 
     public boolean tryToSetValue(int row, int col, int value) {
-        if (currentGridId == null) {
+        if (currentGridId == -1) {
             throw new IllegalStateException("Player is not in a game");
         }
         SudokuGrid currentGrid = sudokus.stream()
@@ -232,7 +232,7 @@ public class Player {
                 throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
             }
             if (currentGrid.setValue(row, col, value)) {
-                this.setValue(Integer.parseInt(this.currentGridId), row, col, value);
+                this.setValue(this.currentGridId, row, col, value);
                 return true;
             }
             return false;
@@ -259,7 +259,7 @@ public class Player {
         if (row > 0 || col > 0) {
             throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
         }
-        unselectCell(Integer.parseInt(this.currentGridId), row, col);
+        unselectCell(this.currentGridId, row, col);
         // TODO se si mette il messaggio nel clearSelection qui va modificato
         clearSelection();
     }
