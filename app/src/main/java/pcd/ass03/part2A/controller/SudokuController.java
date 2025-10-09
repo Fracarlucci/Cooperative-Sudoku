@@ -10,10 +10,11 @@ public interface SudokuController {
   public void clearCellValue();
   public void joinGame(int sudokuId);
   public void leaveGame();
-  public void newGame();
+  public SudokuGrid newGame();
   public void updateView();
   public void notifyCellSelected(SelectCellMessage msg);
   public void notifyCellUnselected(String playerId);
   public void notifyCellValueChanged(SetValueMessage msg);
   public void notifySudokuCreated(SudokuGrid sudokuId);
+  public String getPlayerName();
 }

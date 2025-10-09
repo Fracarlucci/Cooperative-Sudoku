@@ -1,5 +1,6 @@
 package pcd.ass03.part2A.view;
 
+import pcd.ass03.part2A.controller.SudokuController;
 import pcd.ass03.part2A.model.Player;
 import pcd.ass03.part2A.model.SudokuFactory;
 import pcd.ass03.part2A.model.SudokuGrid;
@@ -32,6 +33,8 @@ public class SudokuGUI extends JFrame {
     // Componenti principali
     private CardLayout cardLayout;
     private JPanel mainPanel;
+
+    private SudokuController controller;
     
     // Schermata Lobby
     private JTextField playerNameField;
@@ -49,12 +52,15 @@ public class SudokuGUI extends JFrame {
     private JButton clearCellButton;
     private JButton backToLobbyButton;
     private GameInfo currentGame;
+    private int selectedGridId;
     
     // Per simulare altri giocatori
     private Map<String, Color> playerColors;
     private int colorIndex = 0;
     
-    public SudokuGUI() {
+    public SudokuGUI(SudokuController controller) {
+        this.controller = controller;
+        this.selectedGridId = -1;
         initializeGUI();
         createSampleGames();
     }
@@ -166,11 +172,7 @@ public class SudokuGUI extends JFrame {
         joinGameButton = new JButton("Entra");
         joinGameButton.setPreferredSize(new Dimension(80, 35));
         joinGameButton.addActionListener(e -> {
-            try {
-                joinSelectedGame();
-            } catch (IOException | TimeoutException e1) {
-                e1.printStackTrace();
-            }
+            joinSelectedGame();
         });
         panel.add(joinGameButton);
         
@@ -217,11 +219,7 @@ public class SudokuGUI extends JFrame {
                 return;
             }
             
-            try {
-                createAndJoinGame(gameName, playerName);
-            } catch (IOException | TimeoutException e1) {
-                e1.printStackTrace();
-            }
+            createAndJoinGame(gameName);
             dialog.dispose();
         });
         
@@ -236,72 +234,45 @@ public class SudokuGUI extends JFrame {
         dialog.setVisible(true);
     }
     
-    private void createAndJoinGame(String gameName, String playerName) throws IOException, TimeoutException {
-        // Crea il giocatore
-        try {
-            currentPlayer = new Player("", playerName);
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    private void createAndJoinGame(String gameName) {
         playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
         colorIndex++;
         
-        // Crea la partita
-        int difficulty = 40; // Difficoltà fissa
-        SudokuFactory factory = new SudokuFactory();
-        sudokuGrid = factory.generate(difficulty);
+        sudokuGrid = controller.newGame();
+
         
         GameInfo newGame = new GameInfo(
-            5,
+            sudokuGrid.getId(),
             gameName,
-            difficulty,
+            40,
             1
         );
         
         availableGames.add(newGame);
         currentGame = newGame;
-        currentPlayer.joinGrid(newGame.gameId);
+        this.controller.joinGame(sudokuGrid.getId());
         
         // Passa alla schermata di gioco
         switchToGameScreen();
     }
     
-    private void joinSelectedGame() throws IOException, TimeoutException {
-        String playerName = playerNameField.getText().trim();
-        if (playerName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Inserisci il tuo nome prima di entrare in una partita!");
-            return;
-        }
-        
-        int selectedIndex = gamesList.getSelectedIndex();
-        if (selectedIndex == -1) {
+    private void joinSelectedGame() {
+        String playerName = this.controller.getPlayerName();
+        int selectedIndex = this.selectedGridId;
+        if (this.selectedGridId == -1) {
             JOptionPane.showMessageDialog(this, "Seleziona una partita dalla lista!");
             return;
         }
         
         GameInfo selectedGame = availableGames.get(selectedIndex);
         
-        // Crea il giocatore
-        try {
-            currentPlayer = new Player("", playerName);
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
         colorIndex++;
         
-        // Carica la partita (in un sistema reale si riceverebbe lo stato dal server)
-        SudokuFactory factory = new SudokuFactory();
-        sudokuGrid = factory.generate(selectedGame.difficulty);
-        
+        this.controller.joinGame(selectedIndex);
         currentGame = selectedGame;
-        currentPlayer.joinGrid(selectedGame.gameId);
-        
         // Aggiorna il conteggio giocatori
         selectedGame.playerCount++;
-        
         // Passa alla schermata di gioco
         switchToGameScreen();
     }
@@ -613,6 +584,10 @@ public class SudokuGUI extends JFrame {
                 "Sudoku completato con successo!\\n" +
                 JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    private void updateView() {
+        // TODO da fare
     }
     
     private static class GameInfo {

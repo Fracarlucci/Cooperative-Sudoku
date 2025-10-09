@@ -24,12 +24,14 @@ public class SudokuControllerImpl implements SudokuController {
   }
 
   @Override
-  public void newGame() {
+  public SudokuGrid newGame() {
     SudokuGrid sudoku = this.factory.generate(50);
     try {
       player.createSudoku(sudoku);
+      return sudoku;
     } catch (Exception e) {
       e.printStackTrace();
+      return null;
     }
   }
 
@@ -101,6 +103,11 @@ public class SudokuControllerImpl implements SudokuController {
   @Override
   public void notifySudokuCreated(SudokuGrid sudokuId) {
     this.updateView();
+  }
+
+  @Override
+  public String getPlayerName() {
+    return this.player.getPlayerName();
   }
 
   private boolean isAlreadySelectedCell(Cell cell) {
