@@ -5,6 +5,7 @@ import java.util.Map;
 
 import pcd.ass03.part2A.model.Cell;
 import pcd.ass03.part2A.model.Player;
+import pcd.ass03.part2A.model.PlayerInfo;
 import pcd.ass03.part2A.model.SudokuFactory;
 import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
@@ -57,6 +58,7 @@ public class SudokuControllerImpl implements SudokuController {
       }
       selectedCells.put(player.getPlayerId(), new Cell(row, col, gridId));
       player.selectCell(row, col);
+      this.updateView();
       return true;
     } catch (Exception e) {
       e.printStackTrace();
@@ -65,8 +67,8 @@ public class SudokuControllerImpl implements SudokuController {
   }
 
   @Override
-  public boolean setCellValue(int value) {
-    return player.tryToSetValue(value, value, value);
+  public boolean setCellValue(int row, int col, int value) {
+    return player.tryToSetValue(row, col, value);
   }
 
   @Override
@@ -106,8 +108,8 @@ public class SudokuControllerImpl implements SudokuController {
   }
 
   @Override
-  public String getPlayerName() {
-    return this.player.getPlayerName();
+  public PlayerInfo getCurrentPlayerInfo() {
+    return this.player.getPlayerInfo();
   }
 
   private boolean isAlreadySelectedCell(Cell cell) {

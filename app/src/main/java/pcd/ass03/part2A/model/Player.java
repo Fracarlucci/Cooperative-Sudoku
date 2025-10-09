@@ -215,8 +215,17 @@ public class Player {
         clearSelection();
     }
 
+    public String getColor() {
+        return color;
+    }
+
     public List<Integer> getSudokusId() {
         return sudokus.stream().map(SudokuGrid::getId).toList();
+    }
+
+    public PlayerInfo getPlayerInfo() {
+        return new PlayerInfo(playerId, playerName, isInGame(), 
+                              Integer.toString(currentGridId), selectedRow, selectedCol);
     }
 
     public boolean tryToSetValue(int row, int col, int value) {
