@@ -1,8 +1,7 @@
 package pcd.ass03.part2A.view;
 
 import pcd.ass03.part2A.controller.SudokuController;
-import pcd.ass03.part2A.model.Player;
-import pcd.ass03.part2A.model.SudokuFactory;
+import pcd.ass03.part2A.model.PlayerInfo;
 import pcd.ass03.part2A.model.SudokuGrid;
 
 import javax.swing.*;
@@ -10,10 +9,8 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +43,7 @@ public class SudokuGUI extends JFrame {
     
     // Schermata di Gioco
     private SudokuGrid sudokuGrid;
-    private Player currentPlayer;
+    private PlayerInfo currentPlayerInfo;
     private JTextField[][] gridCells;
     private JLabel playerLabel;
     private JButton clearCellButton;
@@ -60,6 +57,7 @@ public class SudokuGUI extends JFrame {
     
     public SudokuGUI(SudokuController controller) {
         this.controller = controller;
+        this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         this.selectedGridId = -1;
         initializeGUI();
         createSampleGames();
@@ -235,7 +233,8 @@ public class SudokuGUI extends JFrame {
     }
     
     private void createAndJoinGame(String gameName) {
-        playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
+        this.currentPlayerInfo = controller.getCurrentPlayerInfo();
+        playerColors.put(currentPlayerInfo.playerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]); // TODO aggiungere il colore del player
         colorIndex++;
         
         sudokuGrid = controller.newGame();
@@ -257,7 +256,7 @@ public class SudokuGUI extends JFrame {
     }
     
     private void joinSelectedGame() {
-        String playerName = this.controller.getPlayerName();
+        String playerName = this.currentPlayerInfo.playerName();
         int selectedIndex = this.selectedGridId;
         if (this.selectedGridId == -1) {
             JOptionPane.showMessageDialog(this, "Seleziona una partita dalla lista!");
@@ -266,7 +265,7 @@ public class SudokuGUI extends JFrame {
         
         GameInfo selectedGame = availableGames.get(selectedIndex);
         
-        playerColors.put(currentPlayer.getPlayerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
+        playerColors.put(currentPlayerInfo.playerId(), PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]); // TODO aggiungere il colore del player
         colorIndex++;
         
         this.controller.joinGame(selectedIndex);
@@ -378,8 +377,8 @@ public class SudokuGUI extends JFrame {
         
         cell.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                if (currentPlayer != null) {
-                    selectCell(r, c);
+                if (currentPlayerInfo != null) {
+                    controller.selectCell(r, c);
                 }
             }
         });
@@ -388,7 +387,7 @@ public class SudokuGUI extends JFrame {
             @Override
             public void keyTyped(KeyEvent e) {
                 char keyChar = e.getKeyChar();
-                if (currentPlayer == null) {
+                if (currentPlayerInfo == null) {
                     e.consume();
                     return;
                 }
@@ -455,8 +454,8 @@ public class SudokuGUI extends JFrame {
             JOptionPane.YES_NO_OPTION);
         
         if (result == JOptionPane.YES_OPTION) {
-            if (currentPlayer != null) {
-                currentPlayer.leaveGrid();
+            if (currentPlayerInfo != null) {
+                this.controller.leaveGame();
                 if (currentGame != null) {
                     currentGame.playerCount = Math.max(0, currentGame.playerCount - 1);
                 }
@@ -467,43 +466,22 @@ public class SudokuGUI extends JFrame {
             cardLayout.show(mainPanel, "LOBBY");
         }
     }
-
-    private void selectCell(int row, int col) {
-        if (currentPlayer == null) return;
-        
-        // Deseleziona la cella precedente
-        if (currentPlayer.hasSelection()) {
-            sudokuGrid.unselectCell(currentPlayer.getPlayerId(), 
-                                    currentPlayer.getSelectedRow(), 
-                                    currentPlayer.getSelectedCol());
-        }
-        
-        // Seleziona la nuova cella
-        try {
-            currentPlayer.selectCell(row, col);
-        } catch (NumberFormatException | IOException e) {
-            e.printStackTrace();
-        }
-        sudokuGrid.selectCell(currentPlayer.getPlayerId(), row, col);
-        
-        updateCellColors();
-    }
     
     private boolean setValue(int row, int col, int value) {
-        if (sudokuGrid.setValue(row, col, value)) {
+        if (this.controller.setCellValue(row, col, value)) {
             return true;
         }
         return false;
     }
     
     private void clearCell(int row, int col) {
-        sudokuGrid.clearValue(row, col);
+        this.controller.setCellValue(row, col, -1);
     }
     
     private void clearSelectedCell() {
-        if (currentPlayer != null && currentPlayer.hasSelection()) {
-            int row = currentPlayer.getSelectedRow();
-            int col = currentPlayer.getSelectedCol();
+        if (currentPlayerInfo != null) {
+            int row = currentPlayerInfo.selectedRow();
+            int col = currentPlayerInfo.selectedCol();
             clearCell(row, col);
             gridCells[row][col].setText("");
             updateGameDisplay();
@@ -517,7 +495,7 @@ public class SudokuGUI extends JFrame {
         
     // private void newGame() {
     //     initializeGame();
-    //     if (currentPlayer != null) {
+    //     if (currentPlayerInfo != null) {
     //         updatePlayerInfo();
     //     }
     // }
@@ -556,10 +534,10 @@ public class SudokuGUI extends JFrame {
         }
         
         // Evidenzia selezione del giocatore corrente
-        if (currentPlayer != null && currentPlayer.hasSelection()) {
-            int row = currentPlayer.getSelectedRow();
-            int col = currentPlayer.getSelectedCol();
-            Color playerColor = playerColors.get(currentPlayer.getPlayerId());
+        if (currentPlayerInfo != null) {
+            int row = currentPlayerInfo.selectedRow();
+            int col = currentPlayerInfo.selectedCol();
+            Color playerColor = playerColors.get(currentPlayerInfo.playerId());
             if (playerColor != null) {
                 gridCells[row][col].setBackground(playerColor);
             }
@@ -567,10 +545,10 @@ public class SudokuGUI extends JFrame {
     }
     
     private void updatePlayerInfo() {
-        if (currentPlayer != null && currentGame != null) {
+        if (currentPlayerInfo != null && currentGame != null) {
             playerLabel.setText(String.format("Giocatore: %s [%s] - Partita: %s",
-                currentPlayer.getPlayerName(),
-                currentPlayer.getPlayerId(),
+                currentPlayerInfo.playerName(),
+                currentPlayerInfo.playerId(),
                 currentGame.gameName));
         }
     }
