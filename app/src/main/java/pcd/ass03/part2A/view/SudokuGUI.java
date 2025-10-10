@@ -495,7 +495,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
             playerColors.put(playerId, PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
             colorIndex++;
         }
-
         
         // Aggiorna la griglia se siamo in gioco
         if (currentGridId != null && sudokuGrid != null && sudokuGrid.getId().equals(currentGridId)) {
@@ -523,14 +522,14 @@ public class SudokuGUI extends JFrame implements SudokuView {
                 }
             }
         }
-        
+
         // Applica i colori per le celle selezionate
         for (Map.Entry<String, Cell> entry : selectedCells.entrySet()) {
             String playerId = entry.getKey();
             Cell cell = entry.getValue();
             
-            // Verifica che la cella sia nella griglia corrente
-            if (cell.sudokuId() == sudokuGrid.getId() && 
+            // Verifica che la cella sia nella griglia corrente (usa .equals() per confrontare stringhe!)
+            if (cell.sudokuId().equals(sudokuGrid.getId()) && 
                 cell.row() >= 0 && cell.row() < GRID_SIZE && 
                 cell.col() >= 0 && cell.col() < GRID_SIZE) {
                 
