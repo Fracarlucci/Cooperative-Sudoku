@@ -164,8 +164,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
         joinGameButton = new JButton("Entra");
         joinGameButton.setPreferredSize(new Dimension(80, 35));
         joinGameButton.addActionListener(e -> {
-            String selectedIndex = gamesList.getSelectedValue();
-            joinSelectedGame(selectedIndex);
+            int selectedIndex = gamesList.getSelectedIndex();
+            if (selectedIndex >= 0) {
+                joinSelectedGame(selectedIndex);
+            } else {
+                JOptionPane.showMessageDialog(this, "Seleziona una partita dalla lista!");
+            }
         });
         panel.add(joinGameButton);
         
@@ -176,41 +180,32 @@ public class SudokuGUI extends JFrame implements SudokuView {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         
         sudokuGrid = controller.newGame();
-
-        // Non aggiungiamo manualmente la partita - verrà aggiunta dal callback RabbitMQ
-        // quando riceveremo il messaggio di creazione
         currentGame = new GameInfo(
             sudokuGrid.getId(),
             40,
             1
         );
-        
-        this.selectedGridId = sudokuGrid.getId();
-        this.controller.joinGame(sudokuGrid.getId());
-        
-        // Passa alla schermata di gioco
+
         switchToGameScreen();
+
+        this.selectedGridId = currentGame.gameId; //TODO: è PUBLIC!!!
+        this.controller.joinGame(currentGame.gameId); //SE metti sudokuGrid da null
+
         return currentGame.gameId;
     }
 
-    private void joinSelectedGame(String selectedIndex) {
-        this.selectedGridId = selectedIndex;
-        if (this.selectedGridId == null) {
-            JOptionPane.showMessageDialog(this, "Seleziona una partita dalla lista!");
+    private void joinSelectedGame(int selectedIndex) {
+        // Verifica che l'indice sia valido
+        if (selectedIndex < 0 || selectedIndex >= availableGames.size()) {
+            JOptionPane.showMessageDialog(this, "Seleziona una partita valida dalla lista!");
             return;
         }
         
-        GameInfo selectedGame = availableGames.stream()
-            .filter(g -> g.gameId.equals(selectedIndex))
-            .findFirst()
-            .orElse(null);
-
-        if (selectedGame == null) {
-            JOptionPane.showMessageDialog(this, "Partita non trovata!");
-            return;
-        }
+        // Ottieni la partita dall'indice
+        GameInfo selectedGame = availableGames.get(selectedIndex);
         
-        this.controller.joinGame(selectedIndex);
+        this.selectedGridId = selectedGame.gameId;
+        this.controller.joinGame(selectedGame.gameId);
         currentGame = selectedGame;
         selectedGame.playerCount++;
         switchToGameScreen();
@@ -320,6 +315,14 @@ public class SudokuGUI extends JFrame implements SudokuView {
                     e.consume();
                     return;
                 }
+                // TODO: INUTILE CREDO, controllo fatto in player
+                // Verifica che la cella corrente sia quella selezionata
+                // if (currentPlayerInfo.selectedRow() != r || currentPlayerInfo.selectedCol() != c) {
+                //     // Se non è selezionata, selezionala prima
+                //     controller.selectCell(r, c);
+                //     // Aggiorna le info del player
+                //     currentPlayerInfo = controller.getCurrentPlayerInfo();
+                // }
                 
                 if (keyChar >= '1' && keyChar <= '9') {
                     int value = keyChar - '0';
@@ -486,13 +489,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
         }
     }
     
-    private void checkWin() {
+    public void checkWin() {
         if (sudokuGrid != null && sudokuGrid.isComplete()) {
             
             JOptionPane.showMessageDialog(this, 
-                "CONGRATULAZIONI!\\n" +
-                "Sudoku completato con successo!\\n" +
-                JOptionPane.INFORMATION_MESSAGE);
+                "CONGRATULAZIONI!! " +
+                "Sudoku completato con successo!");
         }
     }
 
@@ -516,10 +518,10 @@ public class SudokuGUI extends JFrame implements SudokuView {
             
             // Aggiorna i colori delle celle selezionate
             updateCellSelections(selectedCells);
+        } else {
+            // Aggiorna la lista dei giochi disponibili solo se siamo nella lobby
+            refreshGamesList();
         }
-        
-        // Aggiorna la lista dei giochi disponibili se siamo nella lobby
-        refreshGamesList();
     }
     
     /**
