@@ -1,8 +1,5 @@
 package pcd.ass03.part2A;
 
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
 import pcd.ass03.part2A.controller.SudokuController;
 import pcd.ass03.part2A.controller.SudokuControllerImpl;
 import pcd.ass03.part2A.model.Player;

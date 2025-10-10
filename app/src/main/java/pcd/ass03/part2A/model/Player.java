@@ -270,20 +270,15 @@ public class Player {
     }
 
     public void unselectCell(int row, int col) throws NumberFormatException, IOException {
-        if (row > 0 || col > 0) {
-            throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
-        }
         unselectCell(this.currentGridId, row, col);
-        // TODO se si mette il messaggio nel clearSelection qui va modificato
         clearSelection();
     }
     
     public void clearSelection() {
-        // TODO forse è da mandare una unselect
         this.selectedRow = -1;
         this.selectedCol = -1;
     }
-    
+        
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
