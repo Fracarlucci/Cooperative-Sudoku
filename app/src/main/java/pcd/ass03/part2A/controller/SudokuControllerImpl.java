@@ -37,7 +37,7 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public SudokuGrid newGame() {
-    SudokuGrid sudoku = this.factory.generate(50);
+    SudokuGrid sudoku = this.factory.generate(2);
     try {
       player.createSudoku(sudoku);
       return sudoku;
@@ -95,6 +95,12 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public void leaveGame() {
+    try {
+      player.unselectCell(player.getSelectedRow(), player.getSelectedCol());
+      selectedCells.remove(player.getPlayerId());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     player.leaveGrid();
   }
 
