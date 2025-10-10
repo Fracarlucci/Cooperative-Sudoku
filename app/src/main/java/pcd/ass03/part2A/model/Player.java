@@ -143,7 +143,11 @@ public class Player {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
             System.out.println(playerName + " received cell selection: " + message);
-            controller.notifyCellSelected(selectCellMessage);
+            
+            // Ignora i propri messaggi
+            if (!selectCellMessage.playerId().equals(this.playerId)) {
+                controller.notifyCellSelected(selectCellMessage);
+            }
         };
     }
 
@@ -151,7 +155,11 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
-            controller.notifyCellUnselected(unselectCellMessage);
+            
+            // Ignora i propri messaggi
+            if (!unselectCellMessage.playerId().equals(this.playerId)) {
+                controller.notifyCellUnselected(unselectCellMessage);
+            }
         };
     }
 
@@ -161,20 +169,25 @@ public class Player {
             SetValueMessage setValueMessage = MessageUtils.deserializeSetValueMessage(message);
             System.out.println(playerName + " received value set: " + message);
 
-            sudokus.stream()
-                .filter(grid -> grid.getId() == setValueMessage.sudokuId())
-                .findFirst()
-                .ifPresent(grid -> {
-                    if (setValueMessage.value().equals("")) {
-                        grid.cancelValue(setValueMessage.row(), setValueMessage.col());
-                    } else {
-                        grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
-                    }
-                    // notifyCellValueSet(); // updateView
-                    this.tryToSetValue(selectedRow, selectedCol, Integer.parseInt(setValueMessage.value()));
-                    controller.updateView();
-                    
-                });
+            // Ignora i propri messaggi
+            if (!setValueMessage.playerId().equals(this.playerId)) {
+                sudokus.stream()
+                    .filter(grid -> grid.getId().equals(setValueMessage.sudokuId()))
+                    .findFirst()
+                    .ifPresent(grid -> {
+                        if (setValueMessage.value().equals("")) {
+                            grid.cancelValue(setValueMessage.row(), setValueMessage.col());
+                        } else {
+                            grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
+                        }
+                        tryToSetValue(selectedRow, selectedCol, Integer.parseInt(setValueMessage.value()));
+                        
+                        // Notifica il controller dell'aggiornamento
+                        if (controller != null) {
+                            controller.notifyCellValueChanged(setValueMessage);
+                        }
+                    });
+            }
         };
     }
     
