@@ -117,7 +117,7 @@ public class Player {
     }
 
     public void unselectCell(int gridId, int row, int col) throws IOException {
-        String message = gridId + " " + row + " " + col;
+        String message = gridId + " " + playerId + " " + row + " " + col;
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
@@ -147,8 +147,7 @@ public class Player {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
             System.out.println("Player " + playerName + " received cell selection: " + message);
-            // notifyCellSelected(); // updateView
-            controller.selectCell(selectCellMessage.row(), selectCellMessage.col());
+            controller.notifyCellSelected(selectCellMessage);
         };
     }
 
@@ -156,6 +155,7 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
+            controller.notifyCellUnselected(unselectCellMessage);
         };
     }
 
@@ -323,5 +323,12 @@ public class Player {
 
     public void setController(SudokuController controller) {
         this.controller = controller;
+    }
+
+    public SudokuGrid getCurrentGrid() {
+        return sudokus.stream()
+                      .filter(grid -> grid.getId() == currentGridId)
+                      .findFirst()
+                      .orElse(null);
     }
 }

@@ -50,7 +50,7 @@ public class SudokuControllerImpl implements SudokuController {
   @Override
   public void updateView() {
     if (view != null) {
-      view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId());
+      view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId(), player.getCurrentGrid());
     }
   }
 
@@ -90,6 +90,7 @@ public class SudokuControllerImpl implements SudokuController {
   @Override
   public void joinGame(int sudokuId) {
     player.joinGrid(sudokuId);
+    this.updateView();
   }
 
   @Override
@@ -104,8 +105,8 @@ public class SudokuControllerImpl implements SudokuController {
   }
 
   @Override
-  public void notifyCellUnselected(String playerId) {
-    selectedCells.remove(playerId);
+  public void notifyCellUnselected(UnselectCellMessage msg) {
+    selectedCells.remove(msg.playerId());
     this.updateView();
   }
   

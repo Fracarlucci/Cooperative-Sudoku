@@ -55,7 +55,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
     
     // Per simulare altri giocatori
     private Map<String, Color> playerColors;
-    private int colorIndex = 0;
+    private int colorIndex = (int) (Math.random() * PLAYER_COLORS.length);
     
     public SudokuGUI(SudokuController controller) {
         this.controller = controller;
@@ -565,10 +565,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
     }
 
     @Override
-    public void updateView(int currentGridId, Map<String, Cell> selectedCells, List<Integer> availableSudokusId) {
+    public void updateView(int currentGridId, Map<String, Cell> selectedCells, List<Integer> availableSudokusId, SudokuGrid currentGrid) {
         // Aggiorna le informazioni del giocatore
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
+
+        this.sudokuGrid = currentGrid;
         
         // Aggiorna la griglia se siamo in gioco
         if (currentGridId != -1 && sudokuGrid != null && sudokuGrid.getId() == currentGridId) {

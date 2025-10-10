@@ -47,10 +47,11 @@ public class MessageUtils {
   public static UnselectCellMessage deserializeUnselectCellMessage(String message) {
     String[] elements = message.split(" ");
     int sudokuId = Integer.parseInt(elements[0]);
-    int row = Integer.parseInt(elements[1]);
-    int col = Integer.parseInt(elements[2]);
+    String playerId = elements[1];
+    int row = Integer.parseInt(elements[2]);
+    int col = Integer.parseInt(elements[3]);
 
-    return new UnselectCellMessage(sudokuId, row, col);
+    return new UnselectCellMessage(sudokuId, playerId, row, col);
   }
   
 
