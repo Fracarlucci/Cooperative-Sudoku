@@ -37,7 +37,7 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public SudokuGrid newGame() {
-    SudokuGrid sudoku = this.factory.generate(2);
+    SudokuGrid sudoku = this.factory.generate(10, player.getPlayerInfo().playerName());
     try {
       player.createSudoku(sudoku);
       return sudoku;
@@ -123,8 +123,8 @@ public class SudokuControllerImpl implements SudokuController {
   }
   
   @Override
-  public void notifySudokuCreated(SudokuGrid sudokuId) {
-    view.addGame(sudokuId.getId());
+  public void notifySudokuCreated(SudokuGrid sudokuId, String playerName) {
+    view.addGame(sudokuId.getId(), playerName);
     this.updateView();
   }
 

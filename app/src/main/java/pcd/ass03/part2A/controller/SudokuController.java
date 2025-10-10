@@ -17,6 +17,6 @@ public interface SudokuController {
   public void notifyCellSelected(SelectCellMessage msg);
   public void notifyCellUnselected(UnselectCellMessage msg);
   public void notifyCellValueChanged(SetValueMessage msg);
-  public void notifySudokuCreated(SudokuGrid sudokuId);
+  public void notifySudokuCreated(SudokuGrid sudokuId, String playerName);
   public PlayerInfo getCurrentPlayerInfo();
 }

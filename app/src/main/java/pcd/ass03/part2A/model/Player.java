@@ -85,7 +85,7 @@ public class Player {
 
     public void createSudoku(SudokuGrid grid) throws IOException {
         sudokus.add(grid);
-        String message = MessageUtils.serializeSudokuGrid(grid.getId(), grid.getGrid());
+        String message = MessageUtils.serializeSudokuGrid(grid.getId(), grid.getCreator(), grid.getGrid());
                 
         setupConnectionIfNeeded();
 
@@ -133,7 +133,7 @@ public class Player {
             
             if (sudokus.isEmpty() || sudokus.stream().noneMatch(grid -> grid.getId() == (receivedSudoku.getId()))) {
                 sudokus.add(receivedSudoku);
-                controller.notifySudokuCreated(receivedSudoku);
+                controller.notifySudokuCreated(receivedSudoku, receivedSudoku.getCreator());
             }
         };
     }

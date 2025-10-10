@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class SudokuGrid {
     private final String id;
+    private final String creator;
     private final Integer[][] cells = new Integer[9][9];
     private final Map<String, Set<String>> selections = new HashMap<>(); 
 
@@ -18,13 +19,15 @@ public class SudokuGrid {
             Arrays.fill(cells[r], null);
         }
         this.id = "";
+        this.creator = "";
     }
 
-    public SudokuGrid(Integer[][] initial, String id) {
+    public SudokuGrid(Integer[][] initial, String id, String creator) {
         for (int r = 0; r < 9; r++) {
             System.arraycopy(initial[r], 0, cells[r], 0, 9);
         }
         this.id = id;
+        this.creator = creator;
     }
 
     /** Imposta un valore in una cella, se valido */
@@ -112,5 +115,9 @@ public class SudokuGrid {
 
     public String getId() {
         return id;
+    }
+
+    public String getCreator() {
+        return creator;
     }
 }

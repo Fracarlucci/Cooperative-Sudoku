@@ -10,8 +10,9 @@ public class MessageUtils {
   public static SudokuGrid deserializeSudokuGrid(String message) {
     String[] elements = message.split(" ");
     String sudokuId = elements[0];
+    String creator = elements[1];
     Integer[][] grid = new Integer[9][9];
-    int index = 1;
+    int index = 2;
     try
     {
       for (int row = 0; row < 9; row++) {
@@ -29,7 +30,7 @@ public class MessageUtils {
     {
         e.printStackTrace();
     }
-    return new SudokuGrid(grid, sudokuId);
+    return new SudokuGrid(grid, sudokuId, creator);
   }
 
   public static SelectCellMessage deserializeSelectCellMessage(String message) {
@@ -65,9 +66,9 @@ public class MessageUtils {
     return new SetValueMessage(sudokuId, playerId, row, col, cellValue);
   }
 
-  public static String serializeSudokuGrid(String sudokuId, Integer[][] grid) {
+  public static String serializeSudokuGrid(String sudokuId, String creator, Integer[][] grid) {
     StringBuilder sb = new StringBuilder();
-    sb.append(sudokuId).append(" ");
+    sb.append(sudokuId).append(" ").append(creator).append(" ");
     for (int row = 0; row < 9; row++) {
         for (int col = 0; col < 9; col++) {
             sb.append(grid[row][col]).append(" ");

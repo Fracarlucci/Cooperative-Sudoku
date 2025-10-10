@@ -176,22 +176,20 @@ public class SudokuGUI extends JFrame implements SudokuView {
         return panel;
     }
 
-    private String createAndJoinGame() {
+    private void createAndJoinGame() {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         
         sudokuGrid = controller.newGame();
         currentGame = new GameInfo(
             sudokuGrid.getId(),
             40,
-            1
+            currentPlayerInfo.playerName()
         );
 
         switchToGameScreen();
 
         this.selectedGridId = currentGame.gameId; //TODO: è PUBLIC!!!
         this.controller.joinGame(currentGame.gameId); //SE metti sudokuGrid da null
-
-        return currentGame.gameId;
     }
 
     private void joinSelectedGame(int selectedIndex) {
@@ -207,7 +205,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         this.selectedGridId = selectedGame.gameId;
         this.controller.joinGame(selectedGame.gameId);
         currentGame = selectedGame;
-        selectedGame.playerCount++;
         switchToGameScreen();
     }
     
@@ -222,7 +219,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
         gamesListModel.clear();
         
         for (GameInfo game : availableGames) {
-            gamesListModel.addElement("Partita " + game.gameId);
+            gamesListModel.addElement("Partita " + game.gameId + " di " + game.creator);
         }
     }
     
@@ -387,14 +384,9 @@ public class SudokuGUI extends JFrame implements SudokuView {
         if (result == JOptionPane.YES_OPTION) {
             if (currentPlayerInfo != null) {
                 this.controller.leaveGame();
-                if (currentGame != null) {
-                    currentGame.playerCount = Math.max(0, currentGame.playerCount - 1);
-                }
             }
 
             this.sudokuGrid = null;
-            // this.colorIndex = 0;
-            // this.playerColors.clear();
             
             setTitle("Cooperative Sudoku - Lobby");
             refreshGamesList();
@@ -427,13 +419,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         if (sudokuGrid == null || gridCells == null) return;
         updateDisplay();
     }
-        
-    // private void newGame() {
-    //     initializeGame();
-    //     if (currentPlayerInfo != null) {
-    //         updatePlayerInfo();
-    //     }
-    // }
     
     private void updateDisplay() {
         Integer[][] grid = sudokuGrid.getGrid();
@@ -560,24 +545,23 @@ public class SudokuGUI extends JFrame implements SudokuView {
     private static class GameInfo {
         public final String gameId;
         public final int difficulty;
-        public int playerCount;
+        public String creator;
 
-        public GameInfo(String gameId, int difficulty,
-                       int playerCount) {
+        public GameInfo(String gameId, int difficulty, String creator) {
             this.gameId = gameId;
             this.difficulty = difficulty;
-            this.playerCount = playerCount;
+            this.creator = creator;
         }
     }
 
     @Override
-    public void addGame(String id) {
+    public void addGame(String id, String creator) {
         // Verifica se la partita esiste già prima di aggiungerla
         boolean alreadyExists = availableGames.stream()
             .anyMatch(game -> game.gameId.equals(id));
         
         if (!alreadyExists) {
-            this.availableGames.add(new GameInfo(id, 40, 1));
+            this.availableGames.add(new GameInfo(id, 40, creator));
         }
     }
 }

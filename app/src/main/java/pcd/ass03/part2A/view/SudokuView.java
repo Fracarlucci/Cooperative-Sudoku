@@ -16,7 +16,7 @@ public interface SudokuView {
      */
     void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid);
 
-    void addGame(String id);
+    void addGame(String id, String creator);
 
     void checkWin();
 }

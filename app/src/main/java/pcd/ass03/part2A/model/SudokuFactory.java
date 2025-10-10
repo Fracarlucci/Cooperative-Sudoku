@@ -19,7 +19,7 @@ public class SudokuFactory {
         return sb.toString();
     }
 
-    public SudokuGrid generate(int emptyCells) {
+    public SudokuGrid generate(int emptyCells, String creator) {
         // Genera un nuovo ID per ogni griglia creata
         String id = generateRandomId();
 
@@ -41,7 +41,7 @@ public class SudokuFactory {
             }
         }
 
-    return new SudokuGrid(puzzle, id);
+    return new SudokuGrid(puzzle, id, creator);
   }
 
   private boolean fillGrid(SudokuGrid sudoku) {
