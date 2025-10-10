@@ -118,6 +118,7 @@ public class SudokuControllerImpl implements SudokuController {
   
   @Override
   public void notifyCellValueChanged(SetValueMessage msg) {
+    view.checkWin();
     this.updateView();
   }
   
