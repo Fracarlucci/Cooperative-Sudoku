@@ -37,7 +37,7 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public SudokuGrid newGame() {
-    SudokuGrid sudoku = this.factory.generate(10, player.getPlayerInfo().playerName());
+    SudokuGrid sudoku = this.factory.generate(1, player.getPlayerInfo().playerName());
     try {
       player.createSudoku(sudoku);
       return sudoku;

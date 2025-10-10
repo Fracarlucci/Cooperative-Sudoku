@@ -120,7 +120,7 @@ public class Player {
     }
 
     public void setValue(String gridId, int row, int col, Integer value) throws IOException {
-        String message = gridId + " " + playerId + " " + row + " " + col + " " + (value == null ? "" : value.toString()) + " " + color;
+        String message = gridId + " " + playerId + " " + row + " " + col + " " + (value == null || value < 1 || value > 9 ? "" : value.toString()) + " " + color;
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));

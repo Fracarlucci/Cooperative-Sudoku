@@ -394,7 +394,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
     private void clearCell(int row, int col) {
         this.controller.setCellValue(row, col, -1);
     }
-    
+
     private void clearSelectedCell() {
         if (currentPlayerInfo != null) {
             int row = currentPlayerInfo.selectedRow();
@@ -419,7 +419,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
                 
                 if (value != null) {
                     cell.setText(String.valueOf(value));
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(Color.LIGHT_GRAY);
                     cell.setEditable(false);
                 } else {
                     cell.setText("");
@@ -466,6 +466,14 @@ public class SudokuGUI extends JFrame implements SudokuView {
     
     public void checkWin() {
         if (sudokuGrid != null && sudokuGrid.isComplete()) {
+            // Disabilita ulteriori modifiche alla griglia
+            // TODO: da testare
+            for (int row = 0; row < GRID_SIZE; row++) {
+                for (int col = 0; col < GRID_SIZE; col++) {
+                    gridCells[row][col].setEditable(false);
+                }
+            }
+            
             
             JOptionPane.showMessageDialog(this, 
                 "CONGRATULAZIONI!! " +
