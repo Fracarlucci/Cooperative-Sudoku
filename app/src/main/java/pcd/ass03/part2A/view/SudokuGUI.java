@@ -188,24 +188,22 @@ public class SudokuGUI extends JFrame implements SudokuView {
 
         switchToGameScreen();
 
-        this.selectedGridId = currentGame.gameId; //TODO: è PUBLIC!!!
+        this.selectedGridId = currentGame.gameId; // TODO: è PUBLIC!!!
         this.controller.joinGame(currentGame.gameId); //SE metti sudokuGrid da null
     }
 
     private void joinSelectedGame(int selectedIndex) {
-        // Verifica che l'indice sia valido
         if (selectedIndex < 0 || selectedIndex >= availableGames.size()) {
             JOptionPane.showMessageDialog(this, "Seleziona una partita valida dalla lista!");
             return;
         }
-        
-        // Ottieni la partita dall'indice
         GameInfo selectedGame = availableGames.get(selectedIndex);
         
         this.selectedGridId = selectedGame.gameId;
-        this.controller.joinGame(selectedGame.gameId);
         currentGame = selectedGame;
+        
         switchToGameScreen();
+        this.controller.joinGame(selectedGame.gameId);
     }
     
     private void switchToGameScreen() {
@@ -312,14 +310,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
                     e.consume();
                     return;
                 }
-                // TODO: INUTILE CREDO, controllo fatto in player
-                // Verifica che la cella corrente sia quella selezionata
-                // if (currentPlayerInfo.selectedRow() != r || currentPlayerInfo.selectedCol() != c) {
-                //     // Se non è selezionata, selezionala prima
-                //     controller.selectCell(r, c);
-                //     // Aggiorna le info del player
-                //     currentPlayerInfo = controller.getCurrentPlayerInfo();
-                // }
                 
                 if (keyChar >= '1' && keyChar <= '9') {
                     int value = keyChar - '0';
