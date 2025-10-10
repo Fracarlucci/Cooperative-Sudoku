@@ -10,7 +10,7 @@ public interface SudokuController {
   public boolean selectCell(int row, int col);
   public boolean setCellValue(int row, int col, int value);
   public void clearCellValue();
-  public void joinGame(int sudokuId);
+  public void joinGame(String sudokuId);
   public void leaveGame();
   public SudokuGrid newGame();
   public void updateView();

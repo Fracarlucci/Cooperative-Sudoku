@@ -50,7 +50,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
     private JButton clearCellButton;
     private JButton backToLobbyButton;
     private GameInfo currentGame;
-    private int selectedGridId;
+    private String selectedGridId;
     
     // Per simulare altri giocatori
     private Map<String, Color> playerColors;
@@ -59,7 +59,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
     public SudokuGUI(SudokuController controller) {
         this.controller = controller;
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
-        this.selectedGridId = -1;
         
         // Imposta questa GUI come view nel controller
         if (controller instanceof SudokuControllerImpl) {
@@ -165,44 +164,51 @@ public class SudokuGUI extends JFrame implements SudokuView {
         joinGameButton = new JButton("Entra");
         joinGameButton.setPreferredSize(new Dimension(80, 35));
         joinGameButton.addActionListener(e -> {
-            int selectedIndex = gamesList.getSelectedIndex();
+            String selectedIndex = gamesList.getSelectedValue();
             joinSelectedGame(selectedIndex);
         });
         panel.add(joinGameButton);
         
         return panel;
     }
-    
-    private int createAndJoinGame() {
+
+    private String createAndJoinGame() {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         
         sudokuGrid = controller.newGame();
 
-        GameInfo newGame = new GameInfo(
+        // Non aggiungiamo manualmente la partita - verrà aggiunta dal callback RabbitMQ
+        // quando riceveremo il messaggio di creazione
+        currentGame = new GameInfo(
             sudokuGrid.getId(),
             40,
             1
         );
         
-        availableGames.add(newGame);
-        currentGame = newGame;
         this.selectedGridId = sudokuGrid.getId();
         this.controller.joinGame(sudokuGrid.getId());
         
         // Passa alla schermata di gioco
         switchToGameScreen();
-        return newGame.gameId;
+        return currentGame.gameId;
     }
 
-    private void joinSelectedGame(int selectedIndex) {
+    private void joinSelectedGame(String selectedIndex) {
         this.selectedGridId = selectedIndex;
-        if (this.selectedGridId == -1) {
+        if (this.selectedGridId == null) {
             JOptionPane.showMessageDialog(this, "Seleziona una partita dalla lista!");
             return;
         }
         
-        GameInfo selectedGame = availableGames.get(selectedIndex);
-        
+        GameInfo selectedGame = availableGames.stream()
+            .filter(g -> g.gameId.equals(selectedIndex))
+            .findFirst()
+            .orElse(null);
+
+        if (selectedGame == null) {
+            JOptionPane.showMessageDialog(this, "Partita non trovata!");
+            return;
+        }
         
         this.controller.joinGame(selectedIndex);
         currentGame = selectedGame;
@@ -464,7 +470,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
             int row = currentPlayerInfo.selectedRow();
             int col = currentPlayerInfo.selectedCol();
             Color playerColor = playerColors.get(currentPlayerInfo.playerId());
-            System.out.println(row + " " + col);
+            System.out.println("Player " + currentPlayerInfo.playerId() + " selected cell: " + row + " " + col);
             if (playerColor != null && (row >= 0 && col >= 0 && row < GRID_SIZE && col < GRID_SIZE)) {
                 gridCells[row][col].setBackground(playerColor);
             }
@@ -473,7 +479,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
     
     private void updatePlayerInfo() {
         if (currentPlayerInfo != null && currentGame != null) {
-            playerLabel.setText(String.format("Giocatore: %s - Partita: %d",
+            playerLabel.setText(String.format("Giocatore: %s - Partita: %s",
                 currentPlayerInfo.playerName(),
                 currentGame.gameId
                 ));
@@ -491,7 +497,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
     }
 
     @Override
-    public void updateView(int currentGridId, Map<String, Cell> selectedCells, List<Integer> availableSudokusId, SudokuGrid currentGrid) {
+    public void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid) {
         // Aggiorna le informazioni del giocatore
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
@@ -505,7 +511,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
 
         
         // Aggiorna la griglia se siamo in gioco
-        if (currentGridId != -1 && sudokuGrid != null && sudokuGrid.getId() == currentGridId) {
+        if (currentGridId != null && sudokuGrid != null && sudokuGrid.getId().equals(currentGridId)) {
             updateGameDisplay();
             
             // Aggiorna i colori delle celle selezionate
@@ -550,11 +556,11 @@ public class SudokuGUI extends JFrame implements SudokuView {
     }
     
     private static class GameInfo {
-        public final int gameId;
+        public final String gameId;
         public final int difficulty;
         public int playerCount;
-        
-        public GameInfo(int gameId, int difficulty, 
+
+        public GameInfo(String gameId, int difficulty,
                        int playerCount) {
             this.gameId = gameId;
             this.difficulty = difficulty;
@@ -563,8 +569,13 @@ public class SudokuGUI extends JFrame implements SudokuView {
     }
 
     @Override
-    public void addGame(int id) {
-        System.out.println(availableGames);
-        this.availableGames.add(new GameInfo(id, 40, 1));
+    public void addGame(String id) {
+        // Verifica se la partita esiste già prima di aggiungerla
+        boolean alreadyExists = availableGames.stream()
+            .anyMatch(game -> game.gameId.equals(id));
+        
+        if (!alreadyExists) {
+            this.availableGames.add(new GameInfo(id, 40, 1));
+        }
     }
 }

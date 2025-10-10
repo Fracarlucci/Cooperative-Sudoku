@@ -6,31 +6,42 @@ import java.util.List;
 import java.util.Random;
 
 public class SudokuFactory {
-   /** Genera un Sudoku completo e poi rimuove celle per creare un puzzle */
-  private static final int SIZE = 9;
-  private int counter = 0;
- 
-  public SudokuGrid generate(int emptyCells) {
-        
-      SudokuGrid newSudoku = new SudokuGrid();
-      fillGrid(newSudoku);
+    /** Genera un Sudoku completo e poi rimuove celle per creare un puzzle */
+    private static final int SIZE = 9;
 
-      // copia la soluzione
-      Integer[][] puzzle = deepCopy(newSudoku.getGrid());
+    private String generateRandomId() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnwxyz0123456789";
+        Random rand = new Random();
+        StringBuilder sb = new StringBuilder(6);
+        for (int i = 0; i < 6; i++) {
+                sb.append(chars.charAt(rand.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
 
-      // rimuove celle casualmente
-      Random rand = new Random();
-      int removed = 0;
-      while (removed < emptyCells) {
-          int r = rand.nextInt(SIZE);
-          int c = rand.nextInt(SIZE);
-          if (puzzle[r][c] != null) {
-              puzzle[r][c] = null;
-              removed++;
-          }
-      }
+    public SudokuGrid generate(int emptyCells) {
+        // Genera un nuovo ID per ogni griglia creata
+        String id = generateRandomId();
 
-      return new SudokuGrid(puzzle, counter++);
+        SudokuGrid newSudoku = new SudokuGrid();
+        fillGrid(newSudoku);
+
+        // copia la soluzione
+        Integer[][] puzzle = deepCopy(newSudoku.getGrid());
+
+        // rimuove celle casualmente
+        Random rand = new Random();
+        int removed = 0;
+        while (removed < emptyCells) {
+            int r = rand.nextInt(SIZE);
+            int c = rand.nextInt(SIZE);
+            if (puzzle[r][c] != null) {
+                puzzle[r][c] = null;
+                removed++;
+            }
+        }
+
+    return new SudokuGrid(puzzle, id);
   }
 
   private boolean fillGrid(SudokuGrid sudoku) {

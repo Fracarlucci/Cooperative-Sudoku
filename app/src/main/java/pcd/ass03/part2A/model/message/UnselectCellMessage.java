@@ -1,3 +1,3 @@
 package pcd.ass03.part2A.model.message;
 
-public record UnselectCellMessage(int sudokuId, String playerId, int row, int col) {}
+public record UnselectCellMessage(String sudokuId, String playerId, int row, int col) {}

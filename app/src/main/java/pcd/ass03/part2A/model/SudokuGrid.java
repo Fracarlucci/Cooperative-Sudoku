@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class SudokuGrid {
-    private final int id;
+    private final String id;
     private final Integer[][] cells = new Integer[9][9];
     private final Map<String, Set<String>> selections = new HashMap<>(); 
 
@@ -17,10 +17,10 @@ public class SudokuGrid {
         for (int r = 0; r < 9; r++) {
             Arrays.fill(cells[r], null);
         }
-        this.id = -1;
+        this.id = "";
     }
 
-    public SudokuGrid(Integer[][] initial, int id) {
+    public SudokuGrid(Integer[][] initial, String id) {
         for (int r = 0; r < 9; r++) {
             System.arraycopy(initial[r], 0, cells[r], 0, 9);
         }
@@ -110,7 +110,7 @@ public class SudokuGrid {
         return cells;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 }

@@ -9,7 +9,7 @@ public class MessageUtils {
 
   public static SudokuGrid deserializeSudokuGrid(String message) {
     String[] elements = message.split(" ");
-    int sudokuId = Integer.parseInt(elements[0]);
+    String sudokuId = elements[0];
     Integer[][] grid = new Integer[9][9];
     int index = 1;
     try
@@ -27,7 +27,6 @@ public class MessageUtils {
     } 
     catch (Exception e) 
     {
-      System.out.println("Deserialized SudokuGrid with ID: " + sudokuId);
         e.printStackTrace();
     }
     return new SudokuGrid(grid, sudokuId);
@@ -35,7 +34,7 @@ public class MessageUtils {
 
   public static SelectCellMessage deserializeSelectCellMessage(String message) {
     String[] elements = message.split(" ");
-    int sudokuId = Integer.parseInt(elements[0]);
+    String sudokuId = elements[0];
     String playerId = elements[1];
     int row = Integer.parseInt(elements[2]);
     int col = Integer.parseInt(elements[3]);
@@ -46,7 +45,7 @@ public class MessageUtils {
 
   public static UnselectCellMessage deserializeUnselectCellMessage(String message) {
     String[] elements = message.split(" ");
-    int sudokuId = Integer.parseInt(elements[0]);
+    String sudokuId = elements[0];
     String playerId = elements[1];
     int row = Integer.parseInt(elements[2]);
     int col = Integer.parseInt(elements[3]);
@@ -57,7 +56,7 @@ public class MessageUtils {
 
   public static SetValueMessage deserializeSetValueMessage(String message) {
     String[] elements = message.split(" ");
-    int sudokuId = Integer.parseInt(elements[0]);
+    String sudokuId = elements[0];
     String playerId = elements[1];
     int row = Integer.parseInt(elements[2]);
     int col = Integer.parseInt(elements[3]);
@@ -66,7 +65,7 @@ public class MessageUtils {
     return new SetValueMessage(sudokuId, playerId, row, col, cellValue);
   }
 
-  public static String serializeSudokuGrid(int sudokuId, Integer[][] grid) {
+  public static String serializeSudokuGrid(String sudokuId, Integer[][] grid) {
     StringBuilder sb = new StringBuilder();
     sb.append(sudokuId).append(" ");
     for (int row = 0; row < 9; row++) {

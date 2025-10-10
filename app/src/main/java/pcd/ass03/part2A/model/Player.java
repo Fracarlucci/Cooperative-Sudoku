@@ -31,7 +31,7 @@ public class Player {
     private final String playerId;
     private final String playerName;
     private final String color = String.format("#%06x", (int)(Math.random() * 0xFFFFFF));
-    private volatile int currentGridId;
+    private volatile String currentGridId;
     private volatile int selectedRow = -1;
     private volatile int selectedCol = -1;
 
@@ -44,7 +44,6 @@ public class Player {
         
         this.playerId = "player_" + ID_GENERATOR.incrementAndGet();
         this.playerName = playerName.trim();
-        this.currentGridId = -1;
 
         this.setupConnection();
         this.setupExchangesAndConsumers();
@@ -53,7 +52,6 @@ public class Player {
     public Player(String playerId, String playerName) throws IOException, TimeoutException, InterruptedException {
         this.playerId = playerId;
         this.playerName = playerName;
-        this.currentGridId = -1;
         
         this.setupConnection();
         this.setupExchangesAndConsumers();
@@ -88,22 +86,20 @@ public class Player {
     public void createSudoku(SudokuGrid grid) throws IOException {
         sudokus.add(grid);
         String message = MessageUtils.serializeSudokuGrid(grid.getId(), grid.getGrid());
-        
-        System.out.println("Publishing sudoku " + grid.getId() + " by player " + playerName);
-        
+                
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void selectCell(int gridId, int row, int col) throws IOException {
+    public void selectCell(String gridId, int row, int col) throws IOException {
         String message = gridId + " " + playerId + " " + row + " " + col + " " + color;
         setupConnectionIfNeeded();
         channel.basicPublish(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
     public void setValue(int value) throws IOException {
-        if (currentGridId == -1) {
+        if (currentGridId == null) {
             throw new IllegalStateException("Nessuna griglia selezionata");
         }
         if (selectedRow < 0 || selectedCol < 0) {
@@ -116,14 +112,14 @@ public class Player {
         channel.basicPublish(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void unselectCell(int gridId, int row, int col) throws IOException {
+    public void unselectCell(String gridId, int row, int col) throws IOException {
         String message = gridId + " " + playerId + " " + row + " " + col;
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_UNSELECT_CELL.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void setValue(int gridId, int row, int col, Integer value) throws IOException {
+    public void setValue(String gridId, int row, int col, Integer value) throws IOException {
         String message = gridId + " " + playerId + " " + row + " " + col + " " + (value == null ? "" : value.toString()) + " " + color;
         setupConnectionIfNeeded();
 
@@ -146,7 +142,7 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
-            System.out.println("Player " + playerName + " received cell selection: " + message);
+            System.out.println(playerName + " received cell selection: " + message);
             controller.notifyCellSelected(selectCellMessage);
         };
     }
@@ -163,7 +159,7 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SetValueMessage setValueMessage = MessageUtils.deserializeSetValueMessage(message);
-            System.out.println("Player " + playerName + " received value set: " + message);
+            System.out.println(playerName + " received value set: " + message);
 
             sudokus.stream()
                 .filter(grid -> grid.getId() == setValueMessage.sudokuId())
@@ -175,7 +171,7 @@ public class Player {
                         grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
                     }
                     // notifyCellValueSet(); // updateView
-                    this.tryToSetValue(selectedRow, selectedCol, currentGridId);
+                    this.tryToSetValue(selectedRow, selectedCol, Integer.parseInt(setValueMessage.value()));
                     controller.updateView();
                     
                 });
@@ -190,7 +186,7 @@ public class Player {
         return playerName;
     }
     
-    public int getCurrentGridId() {
+    public String getCurrentGridId() {
         return currentGridId;
     }
 
@@ -207,16 +203,16 @@ public class Player {
     }
     
     public boolean isInGame() {
-        return currentGridId != -1;
+        return currentGridId != null;
     }
 
-    public void joinGrid(int gridId) {
-        System.out.println("Player " + playerName + " joining grid " + gridId);
+    public void joinGrid(String gridId) {
+        System.out.println(playerName + " joining grid " + gridId);
         this.currentGridId = gridId;
     }
     
     public void leaveGrid() {
-        this.currentGridId = -1;
+        this.currentGridId = null;
         clearSelection();
     }
 
@@ -224,7 +220,7 @@ public class Player {
         return color;
     }
 
-    public List<Integer> getSudokusId() {
+    public List<String> getSudokusId() {
         return sudokus.stream().map(SudokuGrid::getId).toList();
     }
 
@@ -234,11 +230,11 @@ public class Player {
     }
 
     public boolean tryToSetValue(int row, int col, int value) {
-        if (currentGridId == -1) {
+        if (currentGridId == null) {
             throw new IllegalStateException("Player is not in a game");
         }
         SudokuGrid currentGrid = sudokus.stream()
-                                        .filter(grid -> grid.getId() == currentGridId)
+                                        .filter(grid -> grid.getId().equals(currentGridId))
                                         .findFirst()
                                         .orElseThrow(() -> new IllegalStateException("Current grid not found"));
         try {
@@ -286,7 +282,7 @@ public class Player {
           .append("id='").append(playerId).append('\'')
           .append(", name='").append(playerName).append('\'');
         
-        if (currentGridId != -1) {
+        if (currentGridId != null) {
             sb.append(", grid='").append(currentGridId).append('\'');
         }
         

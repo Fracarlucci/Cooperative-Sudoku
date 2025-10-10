@@ -14,7 +14,7 @@ public interface SudokuView {
      * @param selectedCells Mappa delle celle selezionate dai vari giocatori
      * @param availableSudokusId Lista degli ID dei sudoku disponibili
      */
-    void updateView(int currentGridId, Map<String, Cell> selectedCells, List<Integer> availableSudokusId, SudokuGrid currentGrid);
+    void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid);
 
-    void addGame(int id);
+    void addGame(String id);
 }

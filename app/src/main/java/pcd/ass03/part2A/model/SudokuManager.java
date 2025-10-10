@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SudokuManager {
-  public final Map<Integer, List<Player>> playersMap;
+  public final Map<String, List<Player>> playersMap;
   public final List<SudokuGrid> sudokuList;
 
   public SudokuManager() {
@@ -14,15 +14,15 @@ public class SudokuManager {
     sudokuList = new ArrayList<>();
   }
 
-  public List<Player> getPlayersInGrid(int sudokuId) {
+  public List<Player> getPlayersInGrid(String sudokuId) {
     return playersMap.get(sudokuId);
   }
 
-  public void addPlayerToSudoku(int sudokuId, Player player) {
+  public void addPlayerToSudoku(String sudokuId, Player player) {
     playersMap.computeIfAbsent(sudokuId, k -> new ArrayList<>()).add(player);
   }
 
-  public void removePlayerFromSudoku(int sudokuId, Player player) {
+  public void removePlayerFromSudoku(String sudokuId, Player player) {
     List<Player> players = playersMap.get(sudokuId);
     if (players != null) {
       players.remove(player);

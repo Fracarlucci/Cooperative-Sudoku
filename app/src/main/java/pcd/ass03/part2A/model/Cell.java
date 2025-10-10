@@ -1,11 +1,11 @@
 package pcd.ass03.part2A.model;
 
-public record Cell(int row, int col, int sudokuId) {
+public record Cell(int row, int col, String sudokuId) {
   @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Cell cell)) return false;
-        return row == cell.row && col == cell.col && sudokuId == cell.sudokuId;
+        return row == cell.row && col == cell.col && sudokuId.equals(cell.sudokuId);
     }
 
     @Override

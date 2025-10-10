@@ -3,16 +3,11 @@ package pcd.ass03.part2A;
 import pcd.ass03.part2A.controller.SudokuController;
 import pcd.ass03.part2A.controller.SudokuControllerImpl;
 import pcd.ass03.part2A.model.Player;
-import pcd.ass03.part2A.model.SudokuFactory;
-import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.view.SudokuGUI;
 
 public class Main {
   public static void main(String[] args) {
-    try {
-        SudokuFactory factory = new SudokuFactory();
-        SudokuGrid sudoku1 = factory.generate(10);
-        
+    try {      
         Player p1 = new Player("p1", "player-1");
         Player p2 = new Player("p2", "player-2");
         
