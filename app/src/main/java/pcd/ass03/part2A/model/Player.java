@@ -25,9 +25,11 @@ import pcd.ass03.part2A.utils.MessageUtils;
  */
 public class Player {
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
+    private static final int GRID_SIZE = 9;
     
     private final List<SudokuGrid> sudokus = new ArrayList<>();
     private Channel channel;
+    private Connection connection;
     private final String playerId;
     private final String playerName;
     private final String color = String.format("#%06x", (int)(Math.random() * 0xFFFFFF));
@@ -70,8 +72,6 @@ public class Player {
         String setValueQueue = channel.queueDeclare().getQueue();
         channel.queueBind(setValueQueue, ChannelsEnum.CHANNEL_SET_VALUE.getName(), "");
         channel.basicConsume(setValueQueue, true, setValueCallBack(), t -> {});
-
-        Thread.sleep(100);
     }
 
     // MESSAGE SENDING METHODS
@@ -114,7 +114,9 @@ public class Player {
             
             if (sudokus.isEmpty() || sudokus.stream().noneMatch(grid -> grid.getId().equals(receivedSudoku.getId()))) {
                 sudokus.add(receivedSudoku);
-                controller.notifySudokuCreated(receivedSudoku, receivedSudoku.getCreator());
+                if (controller != null) {
+                    controller.notifySudokuCreated(receivedSudoku, receivedSudoku.getCreator());
+                }
             }
         };
     }
@@ -125,7 +127,7 @@ public class Player {
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
             
             // Ignores his own messages
-            if (!selectCellMessage.playerId().equals(this.playerId)) {
+            if (!selectCellMessage.playerId().equals(this.playerId) && controller != null) {
                 controller.notifyCellSelected(selectCellMessage);
             }
         };
@@ -137,7 +139,7 @@ public class Player {
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
             
             // Ignores his own messages
-            if (!unselectCellMessage.playerId().equals(this.playerId)) {
+            if (!unselectCellMessage.playerId().equals(this.playerId) && controller != null) {
                 controller.notifyCellUnselected(unselectCellMessage);
             }
         };
@@ -246,7 +248,7 @@ public class Player {
     // If it is a valid move, it selects the cell both locally and sends the message to the other players
     // it also unselects the previously selected cell
     public void selectCell(int row, int col) throws NumberFormatException, IOException {
-        if (row < 0 || row >= 9 || col < 0 || col >= 9) {
+        if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) {
             throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
         }
         if (this.selectedCol >= 0 && this.selectedRow >= 0) {
@@ -270,7 +272,7 @@ public class Player {
     private void setupConnection() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
-        Connection connection = factory.newConnection();
+        this.connection = factory.newConnection();
         this.channel = connection.createChannel();
     }
     

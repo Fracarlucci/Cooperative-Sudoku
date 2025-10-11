@@ -37,8 +37,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
     // Lobby
     private JList<String> gamesList;
     private DefaultListModel<String> gamesListModel;
-    private JButton createGameButton;
-    private JButton joinGameButton;
     private List<GameInfo> availableGames;
     
     // Game screen
@@ -49,7 +47,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
     private JButton clearCellButton;
     private JButton backToLobbyButton;
     private GameInfo currentGame;
-    private String selectedGridId;
     private JLabel winLabel;
     
     private Map<String, Color> playerColors;
@@ -145,12 +142,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
         JPanel panel = new JPanel(new FlowLayout());
         panel.setBackground(BACKGROUND_COLOR);
         
-        createGameButton = new JButton("Crea Partita");
+        JButton createGameButton = new JButton("Crea Partita");
         createGameButton.setPreferredSize(new Dimension(120, 35));
         createGameButton.addActionListener(e -> createAndJoinGame());
         panel.add(createGameButton);
         
-        joinGameButton = new JButton("Entra");
+        JButton joinGameButton = new JButton("Entra");
         joinGameButton.setPreferredSize(new Dimension(80, 35));
         joinGameButton.addActionListener(e -> {
             int selectedIndex = gamesList.getSelectedIndex();
@@ -177,8 +174,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         availableGames.add(currentGame);
 
         switchToGameScreen();
-
-        this.selectedGridId = currentGame.gameId();
         this.controller.joinGame(currentGame.gameId());
     }
 
@@ -187,13 +182,10 @@ public class SudokuGUI extends JFrame implements SudokuView {
             JOptionPane.showMessageDialog(this, "Seleziona una partita valida dalla lista!");
             return;
         }
-        GameInfo selectedGame = availableGames.get(selectedIndex);
-        
-        this.selectedGridId = selectedGame.gameId();
-        currentGame = selectedGame;
+        currentGame = availableGames.get(selectedIndex);
         
         switchToGameScreen();
-        this.controller.joinGame(selectedGame.gameId());
+        this.controller.joinGame(currentGame.gameId());
     }
     
     private void switchToGameScreen() {
