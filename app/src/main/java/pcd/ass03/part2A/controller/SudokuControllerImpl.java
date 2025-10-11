@@ -37,7 +37,7 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public SudokuGrid newGame() {
-    SudokuGrid sudoku = this.factory.generate(1, player.getPlayerInfo().playerName());
+    SudokuGrid sudoku = this.factory.generate(80, player.getPlayerInfo().playerName());
     try {
       player.createSudoku(sudoku);
       return sudoku;
@@ -80,13 +80,13 @@ public class SudokuControllerImpl implements SudokuController {
 
   @Override
   public boolean setCellValue(int row, int col, int value) {
-    return player.tryToSetValue(row, col, value);
+    if (player.tryToSetValue(row, col, value)) {
+      this.updateView();
+      return true;
+    }
+    return false;
   }
-
-  @Override
-  public void clearCellValue() {
-  }
-
+  
   @Override
   public void joinGame(String sudokuId) {
     player.joinGrid(sudokuId);
