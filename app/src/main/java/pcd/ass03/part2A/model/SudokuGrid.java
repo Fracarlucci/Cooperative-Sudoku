@@ -1,17 +1,12 @@
 package pcd.ass03.part2A.model;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 public class SudokuGrid {
     private final String id;
     private final String creator;
-    private final Integer[][] cells = new Integer[9][9];
-    private final Map<String, Set<String>> selections = new HashMap<>(); 
+    private final Integer[][] cells = new Integer[9][9]; 
 
     /** Crea una nuova griglia vuota */
     public SudokuGrid() {
@@ -79,21 +74,6 @@ public class SudokuGrid {
         return true;
     }
 
-    /** Seleziona una cella per un giocatore */
-    public void selectCell(String playerId, int row, int col) {
-        selections.computeIfAbsent(playerId, k -> new HashSet<>())
-                  .add(row + "," + col);
-    }
-
-    /** Deseleziona una cella per un giocatore */
-    public void unselectCell(String playerId, int row, int col) {
-        Set<String> set = selections.get(playerId);
-        if (set != null) {
-            set.remove(row + "," + col);
-            if (set.isEmpty()) selections.remove(playerId);
-        }
-    }
-
     /** Restituisce lo stato della griglia come stringa */
     @Override
     public String toString() {
@@ -104,7 +84,6 @@ public class SudokuGrid {
             }
             sb.append("\n");
         }
-        sb.append("Selections: ").append(selections).append("\n");
         return sb.toString();
     }
 

@@ -112,9 +112,10 @@ public class Player {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SudokuGrid receivedSudoku = MessageUtils.deserializeSudokuGrid(message);
             
+            if (sudokus.isEmpty() || sudokus.stream().noneMatch(grid -> grid.getId().equals(receivedSudoku.getId()))) {
                 sudokus.add(receivedSudoku);
                 controller.notifySudokuCreated(receivedSudoku, receivedSudoku.getCreator());
-            
+            }
         };
     }
 
@@ -196,7 +197,6 @@ public class Player {
     }
 
     public void joinGrid(String gridId) {
-        System.out.println(playerName + " joining grid " + gridId);
         this.currentGridId = gridId;
     }
     

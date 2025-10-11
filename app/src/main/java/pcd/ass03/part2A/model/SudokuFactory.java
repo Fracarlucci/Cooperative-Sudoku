@@ -9,7 +9,7 @@ public class SudokuFactory {
     private static final int SIZE = 9;
 
     private String generateRandomId() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnwxyz0123456789";
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random rand = new Random();
         StringBuilder sb = new StringBuilder(6);
         for (int i = 0; i < 6; i++) {
