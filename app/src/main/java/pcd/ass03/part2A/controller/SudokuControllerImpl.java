@@ -11,14 +11,14 @@ import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
 import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.model.message.UnselectCellMessage;
-import pcd.ass03.part2A.view.SudokuView;
+import pcd.ass03.part2A.view.SudokuGUI;
 
 public class SudokuControllerImpl implements SudokuController {
 
   private final Player player;
   private final SudokuFactory factory;
   private final Map<String, Cell> selectedCells;
-  private SudokuView view;
+  private SudokuGUI view;
 
   public SudokuControllerImpl(Player player) {
     this.player = player;
@@ -27,7 +27,7 @@ public class SudokuControllerImpl implements SudokuController {
     this.view = null;
   }
 
-  public void setView(SudokuView view) {
+  public void setView(SudokuGUI view) {
     this.view = view;
   }
 

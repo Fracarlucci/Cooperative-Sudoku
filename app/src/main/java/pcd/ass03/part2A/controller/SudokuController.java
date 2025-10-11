@@ -5,9 +5,11 @@ import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
 import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.model.message.UnselectCellMessage;
+import pcd.ass03.part2A.view.SudokuGUI;
 
 public interface SudokuController {
   public boolean selectCell(int row, int col);
+  public void setView(SudokuGUI view);
   public boolean setCellValue(int row, int col, int value);
   public void joinGame(String sudokuId);
   public void leaveGame();
