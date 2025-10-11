@@ -296,6 +296,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
                     return;
                 }
                 
+                // Verifica che la cella sia effettivamente selezionata dal player corrente
+                if (currentPlayerInfo.selectedRow() != r || currentPlayerInfo.selectedCol() != c) {
+                    e.consume();
+                    return;
+                }
+                
                 if (keyChar >= '1' && keyChar <= '9') {
                     int value = keyChar - '0';
                     if (setValue(r, c, value)) {
