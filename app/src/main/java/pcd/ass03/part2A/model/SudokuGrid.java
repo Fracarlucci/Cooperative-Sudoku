@@ -9,7 +9,7 @@ public class SudokuGrid {
     private final String id;
     private final String creator;
     private final Integer[][] cells = new Integer[GRID_SIZE][GRID_SIZE];
-
+    
     /** Crea una nuova griglia vuota */
     public SudokuGrid() {
         for (int r = 0; r < GRID_SIZE; r++) {
@@ -18,7 +18,7 @@ public class SudokuGrid {
         this.id = "";
         this.creator = "";
     }
-
+    
     public SudokuGrid(Integer[][] initial, String id, String creator) {
         for (int r = 0; r < GRID_SIZE; r++) {
             System.arraycopy(initial[r], 0, cells[r], 0, GRID_SIZE);
@@ -26,7 +26,7 @@ public class SudokuGrid {
         this.id = id;
         this.creator = creator;
     }
-
+    
     /** Imposta un valore in una cella, se valido */
     public boolean setValue(int row, int col, int value) {
         if (value == -1) {
@@ -42,11 +42,11 @@ public class SudokuGrid {
         cells[row][col] = value;
         return true;
     }
-
+    
     public void cancelValue(int row, int col) {
         cells[row][col] = null;
     }
-
+    
     /** Controlla se inserire value in (row,col) rispetta le regole del Sudoku */
     public boolean isValidMove(int row, int col, int value) {
         for (int c = 0; c < GRID_SIZE; c++) {
@@ -65,7 +65,7 @@ public class SudokuGrid {
         }
         return true;
     }
-
+    
     /** Controlla se la griglia è completata (nessuna cella vuota) */
     public boolean isComplete() {
         for (int r = 0; r < GRID_SIZE; r++) {
@@ -75,7 +75,7 @@ public class SudokuGrid {
         }
         return true;
     }
-
+    
     /** Restituisce lo stato della griglia come stringa */
     @Override
     public String toString() {
@@ -88,15 +88,15 @@ public class SudokuGrid {
         }
         return sb.toString();
     }
-
+    
     public Integer[][] getGrid() {
         return cells;
     }
-
+    
     public String getId() {
         return id;
     }
-
+    
     public String getCreator() {
         return creator;
     }

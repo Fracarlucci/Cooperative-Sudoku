@@ -22,11 +22,11 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     private static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
     private static final Color GRID_COLOR = new Color(120, 120, 120);
     private static final Color PLAYER_COLORS[] = {
-        new Color(255, 182, 193), // Rosa chiaro
-        new Color(144, 238, 144), // Verde chiaro  
-        new Color(255, 218, 185), // Arancione chiaro
-        new Color(221, 160, 221), // Viola chiaro
-        new Color(255, 255, 224)  // Giallo chiaro
+        new Color(255, 182, 193),
+        new Color(144, 238, 144), 
+        new Color(255, 218, 185),
+        new Color(221, 160, 221),
+        new Color(255, 255, 224)
     };
     
     private CardLayout cardLayout;
@@ -444,10 +444,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         }
     }
     
-    /**
-     * Reset and update cell selections colors
-     * @param selectedCells by players
-     */
     private void updateCellSelections(Map<String, Cell> selectedCells) {
         if (gridCells == null || sudokuGrid == null) return;
         
@@ -475,12 +471,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         }
     }
 
-
-    /**
-     * add a new game to the available games list if it doesn't already exist
-     * @param id the game id
-     * @param creator the game creator
-     */
     @Override
     public void addGame(String id, String creator) {
         boolean alreadyExists = availableGames.stream()

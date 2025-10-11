@@ -47,9 +47,7 @@ public class Player {
         this.setupExchangesAndConsumers();
     }
 
-    /**
-     * Create the necessary exchanges and consumers for RabbitMQ communication.
-     */
+    // Create the necessary exchanges and consumers for RabbitMQ communication.
     private void setupExchangesAndConsumers() throws IOException, InterruptedException {
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "fanout");
@@ -303,8 +301,8 @@ public class Player {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Player{")
-          .append("id='").append(playerId).append('\'')
-          .append(", name='").append(playerName).append('\'');
+            .append("id='").append(playerId).append('\'')
+            .append(", name='").append(playerName).append('\'');
         
         if (currentGridId != null) {
             sb.append(", grid='").append(currentGridId).append('\'');

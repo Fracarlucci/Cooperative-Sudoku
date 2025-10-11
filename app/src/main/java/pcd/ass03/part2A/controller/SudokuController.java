@@ -8,16 +8,16 @@ import pcd.ass03.part2A.model.message.UnselectCellMessage;
 import pcd.ass03.part2A.view.SudokuGUI;
 
 public interface SudokuController {
-  public boolean selectCell(int row, int col);
-  public void setView(SudokuGUI view);
-  public boolean setCellValue(int row, int col, int value);
-  public void joinGame(String sudokuId);
-  public void leaveGame();
-  public SudokuGrid newGame();
-  public void updateView();
-  public void notifyCellSelected(SelectCellMessage msg);
-  public void notifyCellUnselected(UnselectCellMessage msg);
-  public void notifyCellValueChanged(SetValueMessage msg);
-  public void notifySudokuCreated(SudokuGrid sudokuId, String playerName);
-  public PlayerInfo getCurrentPlayerInfo();
+    public boolean selectCell(int row, int col);
+    public void setView(SudokuGUI view);
+    public boolean setCellValue(int row, int col, int value);
+    public void joinGame(String sudokuId);
+    public void leaveGame();
+    public SudokuGrid newGame();
+    public void updateView();
+    public void notifyCellSelected(SelectCellMessage msg);
+    public void notifyCellUnselected(UnselectCellMessage msg);
+    public void notifyCellValueChanged(SetValueMessage msg);
+    public void notifySudokuCreated(SudokuGrid sudokuId, String playerName);
+    public PlayerInfo getCurrentPlayerInfo();
 }
