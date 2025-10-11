@@ -27,10 +27,6 @@ public class SudokuControllerImpl implements SudokuController {
     this.view = null;
   }
 
-  /**
-   * Imposta la view da aggiornare
-   * @param view la view del Sudoku
-   */
   public void setView(SudokuView view) {
     this.view = view;
   }
@@ -134,9 +130,7 @@ public class SudokuControllerImpl implements SudokuController {
   }
 
   private boolean isAlreadySelectedCell(Cell cell) {
-    for(Cell selectedCell : this.selectedCells.values()) {
-      if (selectedCell.equals(cell)) { return true; }
-    }
-    return false;
+    return selectedCells.values().stream()
+        .anyMatch(selectedCell -> selectedCell.equals(cell));
   }
 }

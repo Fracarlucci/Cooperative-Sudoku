@@ -21,7 +21,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
     private static final int GRID_SIZE = 9;
     private static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
     private static final Color GRID_COLOR = new Color(120, 120, 120);
-    private static final Color SELECTION_COLOR = new Color(173, 216, 230);
     private static final Color PLAYER_COLORS[] = {
         new Color(255, 182, 193), // Rosa chiaro
         new Color(144, 238, 144), // Verde chiaro  
@@ -175,6 +174,8 @@ public class SudokuGUI extends JFrame implements SudokuView {
             currentPlayerInfo.playerName()
         );
 
+        availableGames.add(currentGame);
+
         switchToGameScreen();
 
         this.selectedGridId = currentGame.gameId();
@@ -296,7 +297,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
                     return;
                 }
                 
-                // Verifica che la cella sia effettivamente selezionata dal player corrente
+                // Check if this cell is selected by the current player
                 if (currentPlayerInfo.selectedRow() != r || currentPlayerInfo.selectedCol() != c) {
                     e.consume();
                     return;
@@ -304,7 +305,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
                 
                 if (keyChar >= '1' && keyChar <= '9') {
                     int value = keyChar - '0';
-                    if (setValue(r, c, value)) {
+                    if (controller.setCellValue(r, c, value)) {
                         cell.setText(String.valueOf(value));
                         updateGameDisplay();
                         checkWin();
@@ -313,7 +314,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
                         updatePlayerInfo();
                     }
                 } else if (keyChar == KeyEvent.VK_DELETE || keyChar == '0') {
-                    clearCell(r, c);
+                    controller.setCellValue(r, c, -1);
                     cell.setText("");
                     updateGameDisplay();
                 } else {
@@ -379,23 +380,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
             cardLayout.show(mainPanel, "LOBBY");
         }
     }
-    
-    private boolean setValue(int row, int col, int value) {
-        if (this.controller.setCellValue(row, col, value)) {
-            return true;
-        }
-        return false;
-    }
-    
-    private void clearCell(int row, int col) {
-        this.controller.setCellValue(row, col, -1);
-    }
 
     private void clearSelectedCell() {
         if (currentPlayerInfo != null) {
             int row = currentPlayerInfo.selectedRow();
             int col = currentPlayerInfo.selectedCol();
-            clearCell(row, col);
+            controller.setCellValue(row, col, -1);
             gridCells[row][col].setText("");
             updateGameDisplay();
         }
@@ -463,21 +453,19 @@ public class SudokuGUI extends JFrame implements SudokuView {
     }
     
     /**
-     * reset + update cell selections colors
+     * Reset and update cell selections colors
      * @param selectedCells by players
      */
     private void updateCellSelections(Map<String, Cell> selectedCells) {
-        System.out.println("CELLLSS: " + selectedCells);
         if (gridCells == null || sudokuGrid == null) return;
         
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
-                // if (sudokuGrid.getGrid()[row][col] == null) {
-                    gridCells[row][col].setBackground(Color.WHITE);
-                // }
+                gridCells[row][col].setBackground(Color.WHITE);
             }
         }
 
+        // Apply player colors to selected cells
         for (Map.Entry<String, Cell> entry : selectedCells.entrySet()) {
             String playerId = entry.getKey();
             Cell cell = entry.getValue();
