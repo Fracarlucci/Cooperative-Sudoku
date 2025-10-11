@@ -20,8 +20,8 @@ import pcd.ass03.part2A.utils.MessageUtils;
 
 
 /**
- * Rappresenta un giocatore nel sistema Cooperative Sudoku distribuito.
- * Ogni giocatore ha un ID univoco, un nome e può partecipare a griglie condivise.
+ * Represents a player in the distributed Cooperative Sudoku system.
+ * Each player has a unique ID, a name, and can participate in shared grids.
  */
 public class Player {
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
@@ -57,6 +57,9 @@ public class Player {
         this.setupExchangesAndConsumers();
     }
 
+    /**
+     * Create the necessary exchanges and consumers for RabbitMQ communication.
+     */
     private void setupExchangesAndConsumers() throws IOException, InterruptedException {
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_CREATE_SUDOKU.getName(), "fanout");
         channel.exchangeDeclare(ChannelsEnum.CHANNEL_SELECT_CELL.getName(), "fanout");
@@ -82,6 +85,8 @@ public class Player {
 
         Thread.sleep(100);
     }
+
+    // MESSAGE SENGING METHODS
 
     public void createSudoku(SudokuGrid grid) throws IOException {
         sudokus.add(grid);
@@ -120,11 +125,13 @@ public class Player {
     }
 
     public void setValue(String gridId, int row, int col, Integer value) throws IOException {
-        String message = gridId + " " + playerId + " " + row + " " + col + " " + (value == null || value < 1 || value > 9 ? "" : value.toString()) + " " + color;
+        String message = gridId + " " + playerId + " " + row + " " + col + " " + (value == null || value < 1 || value > 9 ? -1 : value.toString());
         setupConnectionIfNeeded();
 
         channel.basicPublish(ChannelsEnum.CHANNEL_SET_VALUE.getName(), "", null, message.getBytes(StandardCharsets.UTF_8));
     }
+
+    // CALLBACKS FOR MESSAGE CONSUMERS
 
     private DeliverCallback addSudokuCallBack() {
         return (consumerTag, delivery) -> {
@@ -142,9 +149,8 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SelectCellMessage selectCellMessage = MessageUtils.deserializeSelectCellMessage(message);
-            System.out.println(playerName + " received cell selection: " + message);
             
-            // Ignora i propri messaggi
+            // Ignores his own messages
             if (!selectCellMessage.playerId().equals(this.playerId)) {
                 controller.notifyCellSelected(selectCellMessage);
             }
@@ -156,7 +162,7 @@ public class Player {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             UnselectCellMessage unselectCellMessage = MessageUtils.deserializeUnselectCellMessage(message);
             
-            // Ignora i propri messaggi
+            // Ignores his own messages
             if (!unselectCellMessage.playerId().equals(this.playerId)) {
                 controller.notifyCellUnselected(unselectCellMessage);
             }
@@ -167,22 +173,19 @@ public class Player {
         return (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             SetValueMessage setValueMessage = MessageUtils.deserializeSetValueMessage(message);
-            System.out.println(playerName + " received value set: " + message);
 
-            // Ignora i propri messaggi
+            // Ignores his own messages
             if (!setValueMessage.playerId().equals(this.playerId)) {
                 sudokus.stream()
                     .filter(grid -> grid.getId().equals(setValueMessage.sudokuId()))
                     .findFirst()
                     .ifPresent(grid -> {
-                        if (setValueMessage.value().equals("")) {
+                        if (setValueMessage.value().equals("-1")) {
                             grid.cancelValue(setValueMessage.row(), setValueMessage.col());
                         } else {
                             grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
                         }
-                        tryToSetValue(selectedRow, selectedCol, Integer.parseInt(setValueMessage.value()));
-                        
-                        // Notifica il controller dell'aggiornamento
+
                         if (controller != null) {
                             controller.notifyCellValueChanged(setValueMessage);
                         }
@@ -242,6 +245,7 @@ public class Player {
                               currentGridId, selectedRow, selectedCol);
     }
 
+    // If it is a valid move, it sets the value both locally and sends the message to the other players
     public boolean tryToSetValue(int row, int col, int value) {
         if (currentGridId == null) {
             throw new IllegalStateException("Player is not in a game");
@@ -266,6 +270,8 @@ public class Player {
         
     }
     
+    // If it is a valid move, it selects the cell both locally and sends the message to the other players
+    // it also unselects the previously selected cell
     public void selectCell(int row, int col) throws NumberFormatException, IOException {
         if (row < 0 || row >= 9 || col < 0 || col >= 9) {
             throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
@@ -283,27 +289,9 @@ public class Player {
         clearSelection();
     }
     
-    public void clearSelection() {
+    private void clearSelection() {
         this.selectedRow = -1;
         this.selectedCol = -1;
-    }
-        
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Player{")
-          .append("id='").append(playerId).append('\'')
-          .append(", name='").append(playerName).append('\'');
-        
-        if (currentGridId != null) {
-            sb.append(", grid='").append(currentGridId).append('\'');
-        }
-        
-        if (hasSelection()) {
-            sb.append(", selected=(").append(selectedRow).append(",").append(selectedCol).append(")");
-        }
-        
-        return sb.toString();
     }
 
     private void setupConnection() throws IOException, TimeoutException {
@@ -317,7 +305,7 @@ public class Player {
         try {
             if (channel == null || !channel.isOpen()) {
                 setupConnection();
-                // Se ricreiamo la connessione, dobbiamo ricreare anche gli exchange e consumer
+                // If we recreate the connection, we also need to recreate the exchanges and consumers
                 setupExchangesAndConsumers();
             }
         } catch (TimeoutException | InterruptedException e) {
@@ -334,5 +322,23 @@ public class Player {
                       .filter(grid -> grid.getId() == currentGridId)
                       .findFirst()
                       .orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Player{")
+          .append("id='").append(playerId).append('\'')
+          .append(", name='").append(playerName).append('\'');
+        
+        if (currentGridId != null) {
+            sb.append(", grid='").append(currentGridId).append('\'');
+        }
+        
+        if (hasSelection()) {
+            sb.append(", selected=(").append(selectedRow).append(",").append(selectedCol).append(")");
+        }
+        
+        return sb.toString();
     }
 }

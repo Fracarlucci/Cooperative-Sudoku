@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 public class SudokuFactory {
-    /** Genera un Sudoku completo e poi rimuove celle per creare un puzzle */
     private static final int SIZE = 9;
 
     private String generateRandomId() {
@@ -20,16 +19,14 @@ public class SudokuFactory {
     }
 
     public SudokuGrid generate(int emptyCells, String creator) {
-        // Genera un nuovo ID per ogni griglia creata
         String id = generateRandomId();
 
         SudokuGrid newSudoku = new SudokuGrid();
         fillGrid(newSudoku);
 
-        // copia la soluzione
         Integer[][] puzzle = deepCopy(newSudoku.getGrid());
 
-        // rimuove celle casualmente
+        // remove numbers to create the puzzle
         Random rand = new Random();
         int removed = 0;
         while (removed < emptyCells) {
@@ -44,6 +41,9 @@ public class SudokuFactory {
     return new SudokuGrid(puzzle, id, creator);
   }
 
+    /**
+     * recursive method to fill the grid using backtracking
+     */
   private boolean fillGrid(SudokuGrid sudoku) {
       Integer[][] grid = sudoku.getGrid();
       for (int row = 0; row < SIZE; row++) {
@@ -70,7 +70,6 @@ public class SudokuFactory {
       return true;
   }
 
-  /** Crea una copia profonda della griglia */
   private static Integer[][] deepCopy(Integer[][] grid) {
       Integer[][] copy = new Integer[SIZE][SIZE];
       for (int r = 0; r < SIZE; r++) {
