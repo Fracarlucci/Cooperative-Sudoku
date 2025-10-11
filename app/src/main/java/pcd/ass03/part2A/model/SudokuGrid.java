@@ -32,6 +32,10 @@ public class SudokuGrid {
 
     /** Imposta un valore in una cella, se valido */
     public boolean setValue(int row, int col, int value) {
+        if (value == -1) {
+            cancelValue(row, col);
+            return true;
+        }
         if (value < 1 || value > 9) {
             return false; // valore non valido
         }
@@ -43,11 +47,6 @@ public class SudokuGrid {
     }
 
     public void cancelValue(int row, int col) {
-        cells[row][col] = null;
-    }
-
-    /** Rimuove un valore da una cella */
-    public void clearValue(int row, int col) {
         cells[row][col] = null;
     }
 
