@@ -3,6 +3,7 @@ package pcd.ass03.part2A.view;
 import pcd.ass03.part2A.controller.SudokuController;
 import pcd.ass03.part2A.controller.SudokuControllerImpl;
 import pcd.ass03.part2A.model.Cell;
+import pcd.ass03.part2A.model.GameInfo;
 import pcd.ass03.part2A.model.PlayerInfo;
 import pcd.ass03.part2A.model.SudokuGrid;
 
@@ -29,20 +30,19 @@ public class SudokuGUI extends JFrame implements SudokuView {
         new Color(255, 255, 224)  // Giallo chiaro
     };
     
-    // Componenti principali
     private CardLayout cardLayout;
     private JPanel mainPanel;
 
     private SudokuController controller;
     
-    // Schermata Lobby
+    // Lobby
     private JList<String> gamesList;
     private DefaultListModel<String> gamesListModel;
     private JButton createGameButton;
     private JButton joinGameButton;
     private List<GameInfo> availableGames;
     
-    // Schermata di Gioco
+    // Game screen
     private SudokuGrid sudokuGrid;
     private PlayerInfo currentPlayerInfo;
     private JTextField[][] gridCells;
@@ -51,8 +51,8 @@ public class SudokuGUI extends JFrame implements SudokuView {
     private JButton backToLobbyButton;
     private GameInfo currentGame;
     private String selectedGridId;
+    private JLabel winLabel;
     
-    // Per simulare altri giocatori
     private Map<String, Color> playerColors;
     private int colorIndex = 0;
     
@@ -60,7 +60,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         this.controller = controller;
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         
-        // Imposta questa GUI come view nel controller
         if (controller instanceof SudokuControllerImpl) {
             ((SudokuControllerImpl) controller).setView(this);
         }
@@ -72,11 +71,9 @@ public class SudokuGUI extends JFrame implements SudokuView {
         setTitle("Cooperative Sudoku - Lobby");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        // Usa CardLayout per gestire le diverse schermate
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
         
-        // Crea le due schermate
         JPanel lobbyPanel = createLobbyPanel();
         JPanel gamePanel = createGamePanel();
         
@@ -85,7 +82,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         
         add(mainPanel);
         
-        // Mostra inizialmente la lobby
         cardLayout.show(mainPanel, "LOBBY");
         
         pack();
@@ -101,15 +97,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
         panel.setBackground(BACKGROUND_COLOR);
         panel.setPreferredSize(new Dimension(800, 600));
         
-        // Header
         JPanel headerPanel = createLobbyHeader();
         panel.add(headerPanel, BorderLayout.NORTH);
         
-        // Centro - Lista partite
         JPanel centerPanel = createGamesListPanel();
         panel.add(centerPanel, BorderLayout.CENTER);
         
-        // Footer - Controlli
         JPanel footerPanel = createLobbyControls();
         panel.add(footerPanel, BorderLayout.SOUTH);
         
@@ -120,7 +113,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         JPanel panel = new JPanel(new FlowLayout());
         panel.setBackground(BACKGROUND_COLOR);
         
-        // Logo/Titolo
         JLabel titleLabel = new JLabel("COOPERATIVE SUDOKU");
         titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 24));
         titleLabel.setForeground(new Color(70, 130, 180));
@@ -134,14 +126,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
         panel.setBackground(BACKGROUND_COLOR);
         panel.setBorder(BorderFactory.createTitledBorder("Partite Disponibili"));
         
-        // Lista semplice delle partite
         DefaultListModel<String> listModel = new DefaultListModel<>();
         JList<String> gamesList = new JList<>(listModel);
         gamesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         gamesList.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
         gamesList.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        // Salva riferimento alla lista per aggiornamenti
         this.gamesList = gamesList;
         this.gamesListModel = listModel;
         
@@ -182,14 +172,13 @@ public class SudokuGUI extends JFrame implements SudokuView {
         sudokuGrid = controller.newGame();
         currentGame = new GameInfo(
             sudokuGrid.getId(),
-            40,
             currentPlayerInfo.playerName()
         );
 
         switchToGameScreen();
 
-        this.selectedGridId = currentGame.gameId; // TODO: è PUBLIC!!!
-        this.controller.joinGame(currentGame.gameId); //SE metti sudokuGrid da null
+        this.selectedGridId = currentGame.gameId();
+        this.controller.joinGame(currentGame.gameId());
     }
 
     private void joinSelectedGame(int selectedIndex) {
@@ -199,15 +188,15 @@ public class SudokuGUI extends JFrame implements SudokuView {
         }
         GameInfo selectedGame = availableGames.get(selectedIndex);
         
-        this.selectedGridId = selectedGame.gameId;
+        this.selectedGridId = selectedGame.gameId();
         currentGame = selectedGame;
         
         switchToGameScreen();
-        this.controller.joinGame(selectedGame.gameId);
+        this.controller.joinGame(selectedGame.gameId());
     }
     
     private void switchToGameScreen() {
-        setTitle("Cooperative Sudoku - " + currentGame.gameId);
+        setTitle("Cooperative Sudoku - " + currentGame.gameId());
         updateGameDisplay();
         updatePlayerInfo();
         cardLayout.show(mainPanel, "GAME");
@@ -217,7 +206,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
         gamesListModel.clear();
         
         for (GameInfo game : availableGames) {
-            gamesListModel.addElement("Partita " + game.gameId + " di " + game.creator);
+            gamesListModel.addElement("Partita " + game.gameId() + " di " + game.creator());
         }
     }
     
@@ -226,15 +215,12 @@ public class SudokuGUI extends JFrame implements SudokuView {
         panel.setBackground(BACKGROUND_COLOR);
         panel.setPreferredSize(new Dimension(800, 600));
         
-        // Header con info giocatore
         JPanel headerPanel = createGameHeader();
         panel.add(headerPanel, BorderLayout.NORTH);
         
-        // Centro con griglia
         JPanel gridPanel = createGridPanel();
         panel.add(gridPanel, BorderLayout.CENTER);
         
-        // Lato con controlli
         JPanel sidePanel = createGameSidePanel();
         panel.add(sidePanel, BorderLayout.EAST);
         
@@ -281,7 +267,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
         cell.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
         cell.setPreferredSize(new Dimension(50, 50));
         
-        // Bordo più spesso per separare i quadranti 3x3
+        // Create border for 3x3 subgrids
         Border border;
         int top = (row % 3 == 0 && row != 0) ? 3 : 1;
         int left = (col % 3 == 0 && col != 0) ? 3 : 1;
@@ -290,7 +276,6 @@ public class SudokuGUI extends JFrame implements SudokuView {
         border = BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK);
         cell.setBorder(border);
         
-        // Gestione eventi
         final int r = row;
         final int c = col;
         
@@ -321,7 +306,7 @@ public class SudokuGUI extends JFrame implements SudokuView {
                         e.consume();
                         updatePlayerInfo();
                     }
-                } else if (keyChar == KeyEvent.VK_BACK_SPACE || keyChar == KeyEvent.VK_DELETE || keyChar == '0') {
+                } else if (keyChar == KeyEvent.VK_DELETE || keyChar == '0') {
                     clearCell(r, c);
                     cell.setText("");
                     updateGameDisplay();
@@ -353,8 +338,13 @@ public class SudokuGUI extends JFrame implements SudokuView {
         clearCellButton.addActionListener(e -> clearSelectedCell());
         gbc.gridy = 2;
         panel.add(clearCellButton, gbc);
+
+        this.winLabel = new JLabel("");
+        winLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
+        winLabel.setForeground(new Color(34, 139, 34)); // Verde
+        gbc.gridy = 3;
+        panel.add(winLabel, gbc);
         
-        // Informazioni partita
         JTextArea gameInfo = new JTextArea();
         gameInfo.setEditable(false);
         gameInfo.setBackground(panel.getBackground());
@@ -419,38 +409,11 @@ public class SudokuGUI extends JFrame implements SudokuView {
                 
                 if (value != null) {
                     cell.setText(String.valueOf(value));
-                    cell.setBackground(Color.LIGHT_GRAY);
                     cell.setEditable(false);
                 } else {
                     cell.setText("");
-                    cell.setBackground(Color.WHITE);
                     cell.setEditable(true);
                 }
-            }
-        }
-        updateCellColors();
-    }
-    
-    private void updateCellColors() {
-        if (gridCells == null || sudokuGrid == null) return;
-        
-        // Reset colori
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE; col++) {
-                if (sudokuGrid.getGrid()[row][col] == null) {
-                    gridCells[row][col].setBackground(Color.WHITE);
-                }
-            }
-        }
-        
-        // Evidenzia selezione del giocatore corrente
-        if (currentPlayerInfo != null) {
-            int row = currentPlayerInfo.selectedRow();
-            int col = currentPlayerInfo.selectedCol();
-            Color playerColor = playerColors.get(currentPlayerInfo.playerId());
-            System.out.println("Player " + currentPlayerInfo.playerId() + " selected cell: " + row + " " + col);
-            if (playerColor != null && (row >= 0 && col >= 0 && row < GRID_SIZE && col < GRID_SIZE)) {
-                gridCells[row][col].setBackground(playerColor);
             }
         }
     }
@@ -459,31 +422,20 @@ public class SudokuGUI extends JFrame implements SudokuView {
         if (currentPlayerInfo != null && currentGame != null) {
             playerLabel.setText(String.format("Giocatore: %s - Partita: %s",
                 currentPlayerInfo.playerName(),
-                currentGame.gameId
+                currentGame.gameId()
                 ));
         }
     }
     
     public void checkWin() {
         if (sudokuGrid != null && sudokuGrid.isComplete()) {
-            // Disabilita ulteriori modifiche alla griglia
-            // TODO: da testare
-            for (int row = 0; row < GRID_SIZE; row++) {
-                for (int col = 0; col < GRID_SIZE; col++) {
-                    gridCells[row][col].setEditable(false);
-                }
-            }
-            
-            
-            JOptionPane.showMessageDialog(this, 
-                "CONGRATULAZIONI!! " +
-                "Sudoku completato con successo!");
+            clearCellButton.setEnabled(false);
+            winLabel.setText("Sudoku completato!!");
         }
     }
 
     @Override
     public void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid) {
-        // Aggiorna le informazioni del giocatore
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
 
@@ -493,40 +445,38 @@ public class SudokuGUI extends JFrame implements SudokuView {
             playerColors.put(playerId, PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
             colorIndex++;
         }
-        
-        // Aggiorna la griglia se siamo in gioco
+
+        // If we are in game, update the grid
+        // else update games list
         if (currentGridId != null && sudokuGrid != null && sudokuGrid.getId().equals(currentGridId)) {
             updateGameDisplay();
-            
-            // Aggiorna i colori delle celle selezionate
             updateCellSelections(selectedCells);
         } else {
-            // Aggiorna la lista dei giochi disponibili solo se siamo nella lobby
             refreshGamesList();
         }
     }
     
     /**
-     * Aggiorna i colori delle celle per mostrare le selezioni dei vari giocatori
+     * reset + update cell selections colors
+     * @param selectedCells by players
      */
     private void updateCellSelections(Map<String, Cell> selectedCells) {
+        System.out.println("CELLLSS: " + selectedCells);
         if (gridCells == null || sudokuGrid == null) return;
         
-        // Reset colori per tutte le celle editabili
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
-                if (sudokuGrid.getGrid()[row][col] == null) {
+                // if (sudokuGrid.getGrid()[row][col] == null) {
                     gridCells[row][col].setBackground(Color.WHITE);
-                }
+                // }
             }
         }
 
-        // Applica i colori per le celle selezionate
         for (Map.Entry<String, Cell> entry : selectedCells.entrySet()) {
             String playerId = entry.getKey();
             Cell cell = entry.getValue();
             
-            // Verifica che la cella sia nella griglia corrente (usa .equals() per confrontare stringhe!)
+            // Verify that the cell belongs to the current sudoku grid
             if (cell.sudokuId().equals(sudokuGrid.getId()) && 
                 cell.row() >= 0 && cell.row() < GRID_SIZE && 
                 cell.col() >= 0 && cell.col() < GRID_SIZE) {
@@ -538,27 +488,20 @@ public class SudokuGUI extends JFrame implements SudokuView {
             }
         }
     }
-    
-    private static class GameInfo {
-        public final String gameId;
-        public final int difficulty;
-        public String creator;
 
-        public GameInfo(String gameId, int difficulty, String creator) {
-            this.gameId = gameId;
-            this.difficulty = difficulty;
-            this.creator = creator;
-        }
-    }
 
+    /**
+     * add a new game to the available games list if it doesn't already exist
+     * @param id the game id
+     * @param creator the game creator
+     */
     @Override
     public void addGame(String id, String creator) {
-        // Verifica se la partita esiste già prima di aggiungerla
         boolean alreadyExists = availableGames.stream()
-            .anyMatch(game -> game.gameId.equals(id));
+            .anyMatch(game -> game.gameId().equals(id));
         
         if (!alreadyExists) {
-            this.availableGames.add(new GameInfo(id, 40, creator));
+            this.availableGames.add(new GameInfo(id, creator));
         }
     }
 }
