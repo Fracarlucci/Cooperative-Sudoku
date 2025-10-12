@@ -50,6 +50,8 @@ public class SudokuControllerImpl implements SudokuController {
         }
     }
     
+    // Select cell, if row or col is -1
+    // player will unselect the cell
     @Override
     public boolean selectCell(int row, int col) {
         String gridId = player.getCurrentGridId();
@@ -89,6 +91,7 @@ public class SudokuControllerImpl implements SudokuController {
         this.updateView();
     }
     
+    // Leave game and unselect player cell
     @Override
     public void leaveGame() {
         try {

@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -18,13 +17,7 @@ import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.model.message.UnselectCellMessage;
 import pcd.ass03.part2A.utils.MessageUtils;
 
-
-/**
- * Represents a player in the distributed Cooperative Sudoku system.
- * Each player has a unique ID, a name, and can participate in shared grids.
- */
 public class Player {
-    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
     private static final int GRID_SIZE = 9;
     
     private final List<SudokuGrid> sudokus = new ArrayList<>();
@@ -45,6 +38,10 @@ public class Player {
         
         this.setupConnection();
         this.setupExchangesAndConsumers();
+    }
+
+    public void setController(SudokuController controller) {
+        this.controller = controller;
     }
 
     // Create the necessary exchanges and consumers for RabbitMQ communication.
@@ -167,56 +164,6 @@ public class Player {
             }
         };
     }
-    
-    public String getPlayerId() {
-        return playerId;
-    }
-    
-    public String getPlayerName() {
-        return playerName;
-    }
-    
-    public String getCurrentGridId() {
-        return currentGridId;
-    }
-
-    public int getSelectedRow() {
-        return selectedRow;
-    }
-    
-    public int getSelectedCol() {
-        return selectedCol;
-    }
-    
-    public boolean hasSelection() {
-        return selectedRow >= 0 && selectedCol >= 0;
-    }
-    
-    public boolean isInGame() {
-        return currentGridId != null;
-    }
-
-    public void joinGrid(String gridId) {
-        this.currentGridId = gridId;
-    }
-    
-    public void leaveGrid() {
-        this.currentGridId = null;
-        clearSelection();
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public List<String> getSudokusId() {
-        return sudokus.stream().map(SudokuGrid::getId).toList();
-    }
-
-    public PlayerInfo getPlayerInfo() {
-        return new PlayerInfo(playerId, playerName, isInGame(), 
-                              currentGridId, selectedRow, selectedCol);
-    }
 
     // If it is a valid move, it sets the value both locally and sends the message to the other players
     public boolean tryToSetValue(int row, int col, int value) {
@@ -286,8 +233,54 @@ public class Player {
         }
     }
 
-    public void setController(SudokuController controller) {
-        this.controller = controller;
+    public String getPlayerId() {
+        return playerId;
+    }
+    
+    public String getPlayerName() {
+        return playerName;
+    }
+    
+    public String getCurrentGridId() {
+        return currentGridId;
+    }
+
+    public int getSelectedRow() {
+        return selectedRow;
+    }
+    
+    public int getSelectedCol() {
+        return selectedCol;
+    }
+    
+    public boolean hasSelection() {
+        return selectedRow >= 0 && selectedCol >= 0;
+    }
+    
+    public boolean isInGame() {
+        return currentGridId != null;
+    }
+
+    public void joinGrid(String gridId) {
+        this.currentGridId = gridId;
+    }
+    
+    public void leaveGrid() {
+        this.currentGridId = null;
+        clearSelection();
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public List<String> getSudokusId() {
+        return sudokus.stream().map(SudokuGrid::getId).toList();
+    }
+
+    public PlayerInfo getPlayerInfo() {
+        return new PlayerInfo(playerId, playerName, isInGame(), 
+                              currentGridId, selectedRow, selectedCol);
     }
 
     public SudokuGrid getCurrentGrid() {
