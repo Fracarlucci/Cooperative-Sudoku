@@ -5,7 +5,7 @@ import pcd.ass03.part2B.controller.SudokuControllerImpl;
 import pcd.ass03.part2B.model.Player;
 import pcd.ass03.part2B.view.SudokuGUIimpl;
 
-public class Main {
+public class Server {
     public static void main(String[] args) {
         try {      
             Player p1 = new Player("p1", "player-1");
