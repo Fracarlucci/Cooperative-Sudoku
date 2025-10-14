@@ -1,5 +1,6 @@
 package pcd.ass03.part2B.model;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,13 +55,19 @@ public class SudokuFactory {
                     Collections.shuffle(numbers);
                     
                     for (int num : numbers) {
-                        if (sudoku.isValidMove(row, col, num)) {
-                            grid[row][col] = num;
-                            if (fillGrid(sudoku)) {
-                                return true;
-                            } else {
-                                grid[row][col] = null;
+                        try {
+                            if (sudoku.isValidMove(row, col, num)) {
+                                grid[row][col] = num;
+                                if (fillGrid(sudoku)) {
+                                    return true;
+                                } else {
+                                    grid[row][col] = null;
+                                }
                             }
+                        } catch (RemoteException e) {
+                            // Handle the exception as appropriate, here we just print the stack trace
+                            e.printStackTrace();
+                            return false;
                         }
                     }
                     return false;
