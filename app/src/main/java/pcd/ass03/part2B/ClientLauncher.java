@@ -9,8 +9,15 @@ public class ClientLauncher {
     public static void main(String[] args) {
         try {      
             Player p1 = new Player("p1", "player-1");
+            Player p2 = new Player("p2", "player-2");
 
-            p1.createSudoku();
+            String sudokuId = p1.createSudoku();
+            p2.joinGrid(sudokuId);
+            p2.selectCell(1, 1);
+            p2.tryToSetValue(1, 1, 5);
+            
+            p1.selectCell(1, 1);
+            p1.tryToSetValue(1, 1, -1);
             
             // SudokuController controller1 = new SudokuControllerImpl(p1);
             // SudokuController controller2 = new SudokuControllerImpl(p2);
