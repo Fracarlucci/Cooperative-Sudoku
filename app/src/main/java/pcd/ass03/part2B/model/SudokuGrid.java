@@ -1,14 +1,22 @@
 package pcd.ass03.part2B.model;
 
+import java.io.Serializable;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import pcd.ass03.part2B.model.Cell;
 
-public class SudokuGrid {
+public class SudokuGrid implements Sudoku, Serializable {
     private static final int GRID_SIZE = 9;
     
     private final String id;
     private final String creator;
     private final Integer[][] cells = new Integer[GRID_SIZE][GRID_SIZE];
+    private final Map<String, Cell> selectedCells;
+
     
     /** Crea una nuova griglia vuota */
     public SudokuGrid() {
@@ -17,6 +25,7 @@ public class SudokuGrid {
         }
         this.id = "";
         this.creator = "";
+        this.selectedCells = new HashMap<>();
     }
     
     public SudokuGrid(Integer[][] initial, String id, String creator) {
@@ -25,10 +34,11 @@ public class SudokuGrid {
         }
         this.id = id;
         this.creator = creator;
+        this.selectedCells = new HashMap<>();
     }
     
     /** Imposta un valore in una cella, se valido */
-    public boolean setValue(int row, int col, int value) {
+    public boolean setValue(int row, int col, int value) throws RemoteException {
         if (value == -1) {
             cancelValue(row, col);
             return true;
@@ -48,7 +58,7 @@ public class SudokuGrid {
     }
     
     /** Controlla se inserire value in (row,col) rispetta le regole del Sudoku */
-    public boolean isValidMove(int row, int col, int value) {
+    public boolean isValidMove(int row, int col, int value) throws RemoteException {
         for (int c = 0; c < GRID_SIZE; c++) {
             if (Objects.equals(cells[row][c], value)) return false;
         }
@@ -67,7 +77,7 @@ public class SudokuGrid {
     }
     
     /** Controlla se la griglia è completata (nessuna cella vuota) */
-    public boolean isComplete() {
+    public boolean isComplete() throws RemoteException {
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
                 if (cells[r][c] == null) return false;
@@ -99,5 +109,9 @@ public class SudokuGrid {
     
     public String getCreator() {
         return creator;
+    }
+
+    public Map<String, Cell> getSelectedCells() {
+        return selectedCells;
     }
 }
