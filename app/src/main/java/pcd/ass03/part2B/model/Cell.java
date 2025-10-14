@@ -1,15 +1,17 @@
 package pcd.ass03.part2B.model;
 
-public record Cell(int row, int col, String sudokuId) {
+import java.io.Serializable;
+
+public record Cell(int row, int col) implements Serializable {
   @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Cell cell)) return false;
-        return row == cell.row && col == cell.col && sudokuId.equals(cell.sudokuId);
+        return row == cell.row && col == cell.col;
     }
 
     @Override
     public String toString() {
-        return "Cell(" + row + "," + col + ") in Sudoku " + sudokuId;
+        return "Cell(" + row + "," + col + ")";
     }
 }
