@@ -55,11 +55,13 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
 
     // MESSAGE SENDING METHODS
 
-    public void createSudoku() throws RemoteException {
+    public String createSudoku() throws RemoteException {
+        System.out.println("Player " + playerId + " is creating a new Sudoku...");
         SudokuGrid sudoku = server.createSudoku(playerId);
         this.sudoku = sudoku;
         this.currentGridId = sudoku.getId();
         server.registerPlayerInSudoku(playerId, currentGridId);
+        return sudoku.getId();
     }
 
     private void sendSelectCell(int row, int col) throws RemoteException {
@@ -83,15 +85,11 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
         if (currentGridId == null) {
             throw new IllegalStateException("Player is not in a game");
         }
-        SudokuGrid currentGrid = sudoku; // TODO da modificare
         try {
             if (row != this.selectedRow || col != this.selectedCol) {
                 throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
             }
-            if (currentGrid.setValue(row, col, value)) {
-                sendSetValue(row, col, value);
-                return true;
-            }
+            sendSetValue(row, col, value);
             return false;
         } catch (IOException e) {
             e.printStackTrace();
@@ -102,19 +100,28 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     
     // If it is a valid move, it selects the cell both locally and sends the message to the other players
     // it also unselects the previously selected cell
-    public void selectCell(int row, int col) throws NumberFormatException, IOException {
+    public void selectCell(int row, int col) {
         if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) {
             throw new IllegalArgumentException("Coordinata cella non valida: (" + row + "," + col + ")");
         }
         if (this.selectedCol >= 0 && this.selectedRow >= 0) {
-            sendUnselectCell(this.selectedRow, this.selectedCol);
+            try {
+                sendUnselectCell(this.selectedRow, this.selectedCol);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                return;
+            }
         }
         this.selectedRow = row;
         this.selectedCol = col;
-        sendSelectCell(row, col);
+        try {
+            sendSelectCell(row, col);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void unselectCell(int row, int col) throws NumberFormatException, IOException {
+    public void unselectCell(int row, int col) throws IOException {
         sendUnselectCell(row, col);
         clearSelection();
     }
@@ -124,7 +131,8 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
         this.selectedCol = -1;
     }
 
-    public String getPlayerId() {
+    @Override
+    public String getPlayerId() throws RemoteException {
         return playerId;
     }
     
@@ -200,5 +208,6 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     @Override
     public void notifyUser(SudokuGrid sudoku) throws RemoteException {
         this.sudoku = sudoku;
+        System.out.println("Player " + playerId + " received update for Sudoku " + sudoku);
     }
 }
