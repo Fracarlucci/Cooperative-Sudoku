@@ -14,8 +14,8 @@ import pcd.ass03.part2B.model.message.UnselectCellMessage;
 public class ServerImpl implements Server {
 
     private List<SudokuGrid> grids;
-    private List<Player> players;
-    private Map<String, List<Player>> playersInSudoku;
+    private List<UserCallbackInterface> players;
+    private Map<String, List<UserCallbackInterface>> playersInSudoku;
     private SudokuFactory factory;
 
     public ServerImpl() {
@@ -26,7 +26,7 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public synchronized void registerPlayer(Player player) throws RemoteException {
+    public synchronized void registerPlayer(UserCallbackInterface player) throws RemoteException {
         if (!players.contains(player)) {
             players.add(player);
         }
@@ -38,14 +38,21 @@ public class ServerImpl implements Server {
         if (gridOpt.isEmpty()) {
             return false;
         }
-        Player player = players.stream()
-                               .filter(p -> p.getPlayerId()
-                               .equals(playerId))
-                               .findFirst()
-                               .orElse(null);
+        UserCallbackInterface player = players.stream()
+                                        .filter(p -> {
+                                            try {
+                                                return p.getPlayerId().equals(playerId);
+                                            } catch (RemoteException e) {
+                                                e.printStackTrace();
+                                                return false;
+                                            }
+                                        })
+                                        .findFirst()
+                                        .orElse(null);
         playersInSudoku.putIfAbsent(gridId, new ArrayList<>());
-        List<Player> playersList = playersInSudoku.get(gridId);
+        List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
         playersList.add(player);
+        System.out.println("Player " + playerId + " registered in Sudoku " + gridId);
         return true;
     }
 
@@ -53,6 +60,7 @@ public class ServerImpl implements Server {
     public synchronized SudokuGrid createSudoku(String creator) throws RemoteException {
         SudokuGrid newGrid = factory.generate(50, creator);
         grids.add(newGrid);
+        System.out.println("New Sudoku created with ID: " + newGrid.getId() + " by player: " + creator);
         return newGrid;
     }
     
@@ -73,6 +81,7 @@ public class ServerImpl implements Server {
             if (success) {
                 notifyClients(msg.sudokuId());
             }
+            System.out.println("Player set value " + msg.value() + " at (" + msg.row() + "," + msg.col() + ") in Sudoku " + msg.sudokuId());
             return success;
         }
         return false;
@@ -104,7 +113,7 @@ public class ServerImpl implements Server {
 
     // It notifies all the players in the same sudoku that a change has been made
     private synchronized void notifyClients(String gridId) throws RemoteException {
-        List<Player> playersList = playersInSudoku.get(gridId);
+        List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
         SudokuGrid sudoku = getSudoku(gridId).orElseThrow();
         playersList.forEach(p -> {
             try {

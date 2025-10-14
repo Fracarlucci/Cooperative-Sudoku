@@ -11,7 +11,8 @@ import pcd.ass03.part2B.model.message.UnselectCellMessage;
 
 public interface Server extends Remote {
     
-    public void registerPlayer(Player player) throws RemoteException;
+    // Ho utilizzato un'interfaccia perchè RMI passa solo oggetti remoti attraverso interfacce Remote, mai classi concrete.
+    public void registerPlayer(UserCallbackInterface player) throws RemoteException;
 
     public boolean registerPlayerInSudoku(String playerId, String gridId) throws RemoteException;
 
