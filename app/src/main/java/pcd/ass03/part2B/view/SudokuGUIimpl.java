@@ -12,7 +12,6 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -182,7 +181,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
             return;
         }
         currentGame = availableGames.get(selectedIndex);
-        
+
         switchToGameScreen();
         this.controller.joinGame(currentGame.gameId());
     }
@@ -299,8 +298,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
                     if (controller.setCellValue(r, c, value)) {
                         cell.setText(String.valueOf(value));
                         updateGameDisplay();
-                        System.out.println("Player " + currentPlayerInfo.playerName() + " set cell (" + r + "," + c + ") to " + value);
-                        checkWin();
                     } else {
                         e.consume();
                         updatePlayerInfo();
@@ -382,13 +379,15 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
             updateGameDisplay();
         }
     }
-    
+
     private void updateGameDisplay() {
         if (sudokuGrid == null || gridCells == null) return;
+        checkWin();
         updateDisplay();
     }
     
     private void updateDisplay() {
+        if (sudokuGrid == null || gridCells == null) return;
         Integer[][] grid = sudokuGrid.getGrid();
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
@@ -416,9 +415,13 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     }
     
     public void checkWin() {
-        if (sudokuGrid != null && controller.isSudokuComplete()) {
+        if (controller.isSudokuComplete()) {
             clearCellButton.setEnabled(false);
             winLabel.setText("Sudoku completato!!");
+        }
+        else {
+            clearCellButton.setEnabled(true);
+            winLabel.setText("");
         }
     }
 
