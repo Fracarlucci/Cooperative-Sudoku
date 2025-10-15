@@ -55,13 +55,14 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
 
     // MESSAGE SENDING METHODS
 
-    public String createSudoku() throws RemoteException {
+    public SudokuGrid createSudoku() throws RemoteException {
         System.out.println("Player " + playerId + " is creating a new Sudoku...");
         SudokuGrid sudoku = server.createSudoku(playerId);
         this.sudoku = sudoku;
         this.currentGridId = sudoku.getId();
-        server.registerPlayerInSudoku(playerId, currentGridId);
-        return sudoku.getId();
+        server.joinGame(playerId, currentGridId);
+
+        return sudoku;
     }
 
     private void sendSelectCell(int row, int col) throws RemoteException {
@@ -77,7 +78,7 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     }
 
     private void sendRegisterInSudoku(String gridId) throws RemoteException {
-        server.registerPlayerInSudoku(playerId, gridId);
+        server.joinGame(playerId, gridId);
     }
 
     // If it is a valid move, it sets the value both locally and sends the message to the other players
@@ -171,6 +172,12 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     
     public void leaveGrid() {
         this.currentGridId = null;
+        try {
+			this.server.leaveGame(this.playerId, this.currentGridId);
+		} catch (RemoteException e) {
+            System.out.println("An error occurred while leaving the game");
+			e.printStackTrace();
+		}
         clearSelection();
     }
 
@@ -208,6 +215,11 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     @Override
     public void notifyUser(SudokuGrid sudoku) throws RemoteException {
         this.sudoku = sudoku;
-        System.out.println("Player " + playerId + " received update for Sudoku " + sudoku);
+        this.controller.updateView(this.currentGridId, this.sudoku);
+    }
+
+    @Override
+    public void notifySudokuListUpdate(List<String> sudokusIds) throws RemoteException {
+        this.controller.updateSudokuList(sudokusIds);
     }
 }
