@@ -17,6 +17,7 @@ public interface SudokuController {
     public void leaveGame();
     public SudokuGrid newGame();
     public void updateView(String gridId, SudokuGrid sudoku);
-    public void updateSudokuList(List<String> sudokusIds);
+    public void updateSudokuList(String sudokuId, String creator);
     public PlayerInfo getCurrentPlayerInfo();
+    public boolean isSudokuComplete();
 }

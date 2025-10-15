@@ -50,8 +50,9 @@ public class SudokuControllerImpl implements SudokuController {
     }
 
     @Override
-    public void updateSudokuList(List<String> sudokusIds) {
-        view.updateSudokuList(sudokusIds);
+    public void updateSudokuList(String sudokuId, String creator) {
+        view.addGame(sudokuId, creator);
+        // view.updateSudokuList(sudokuId, creator);
     }
     
     // Select cell, if row or col is -1
@@ -110,6 +111,12 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public PlayerInfo getCurrentPlayerInfo() {
         return this.player.getPlayerInfo();
+    }
+
+    @Override
+    public boolean isSudokuComplete() {
+        System.out.println("Checking if sudoku is complete...");
+        return player.checkSudokuComplete();
     }
     
     private boolean isAlreadySelectedCell(Cell cell) {
