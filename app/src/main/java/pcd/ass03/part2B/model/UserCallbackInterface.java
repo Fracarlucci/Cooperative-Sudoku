@@ -7,5 +7,5 @@ import java.util.List;
 public interface UserCallbackInterface extends Remote {
     String getPlayerId() throws RemoteException;
     public void notifyUser(SudokuGrid sudoku) throws RemoteException;
-    public void notifySudokuListUpdate(List<String> sudokusIds) throws RemoteException;
+    public void notifySudokuListUpdate(String sudokuId, String creator) throws RemoteException;
 }
