@@ -87,6 +87,9 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
             if (row != this.selectedRow || col != this.selectedCol) {
                 throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
             }
+            if (value < 1 || value > 9) {
+                return false;
+            }
             sendSetValue(row, col, value);
             return true;
         } catch (IOException e) {
