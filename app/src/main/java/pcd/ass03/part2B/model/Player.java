@@ -1,21 +1,11 @@
 package pcd.ass03.part2B.model;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeoutException;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
-
-import pcd.ass03.part2A.utils.MessageUtils;
 import pcd.ass03.part2B.controller.SudokuController;
 import pcd.ass03.part2B.model.message.SelectCellMessage;
 import pcd.ass03.part2B.model.message.SetValueMessage;
@@ -98,7 +88,7 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
                 throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
             }
             sendSetValue(row, col, value);
-            return false;
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -169,9 +159,10 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     }
 
     public boolean checkSudokuComplete() {
-        if (sudoku == null) return false;
+        if (sudoku == null) {
+            return false;
+        }
         try {
-            System.out.println(sudoku.isComplete());
             return sudoku.isComplete();
         } catch (RemoteException e) {
             e.printStackTrace();

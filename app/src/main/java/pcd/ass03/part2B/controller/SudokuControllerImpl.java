@@ -1,7 +1,6 @@
 package pcd.ass03.part2B.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import pcd.ass03.part2B.model.Cell;
@@ -9,9 +8,6 @@ import pcd.ass03.part2B.model.Player;
 import pcd.ass03.part2B.model.PlayerInfo;
 import pcd.ass03.part2B.model.SudokuFactory;
 import pcd.ass03.part2B.model.SudokuGrid;
-import pcd.ass03.part2B.model.message.SelectCellMessage;
-import pcd.ass03.part2B.model.message.SetValueMessage;
-import pcd.ass03.part2B.model.message.UnselectCellMessage;
 import pcd.ass03.part2B.view.SudokuGUI;
 
 public class SudokuControllerImpl implements SudokuController {
@@ -115,7 +111,6 @@ public class SudokuControllerImpl implements SudokuController {
 
     @Override
     public boolean isSudokuComplete() {
-        System.out.println("Checking if sudoku is complete...");
         return player.checkSudokuComplete();
     }
     

@@ -5,8 +5,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import pcd.ass03.part2B.controller.SudokuController;
-import pcd.ass03.part2B.model.Player;
 import pcd.ass03.part2B.model.Server;
 import pcd.ass03.part2B.model.ServerImpl;
 

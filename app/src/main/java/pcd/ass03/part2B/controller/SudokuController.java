@@ -1,12 +1,7 @@
 package pcd.ass03.part2B.controller;
 
-import java.util.List;
-
 import pcd.ass03.part2B.model.PlayerInfo;
 import pcd.ass03.part2B.model.SudokuGrid;
-import pcd.ass03.part2B.model.message.SelectCellMessage;
-import pcd.ass03.part2B.model.message.SetValueMessage;
-import pcd.ass03.part2B.model.message.UnselectCellMessage;
 import pcd.ass03.part2B.view.SudokuGUI;
 
 public interface SudokuController {

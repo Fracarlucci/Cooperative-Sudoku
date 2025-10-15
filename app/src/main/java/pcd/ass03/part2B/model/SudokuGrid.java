@@ -1,13 +1,11 @@
 package pcd.ass03.part2B.model;
 
 import java.io.Serializable;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import pcd.ass03.part2B.model.Cell;
 
 public class SudokuGrid implements Sudoku, Serializable {
     private static final int GRID_SIZE = 9;
@@ -112,7 +110,6 @@ public class SudokuGrid implements Sudoku, Serializable {
     }
 
     public Map<String, Cell> getSelectedCells() {
-        System.out.println(selectedCells.values());
         return selectedCells;
     }
 }

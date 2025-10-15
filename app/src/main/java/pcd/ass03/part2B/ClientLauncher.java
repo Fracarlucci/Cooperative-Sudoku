@@ -4,7 +4,6 @@ import pcd.ass03.part2B.controller.SudokuController;
 import pcd.ass03.part2B.controller.SudokuControllerImpl;
 import pcd.ass03.part2B.model.Player;
 import pcd.ass03.part2B.view.SudokuGUIimpl;
-import pcd.ass03.part2B.model.SudokuGrid;
 
 public class ClientLauncher {
     public static void main(String[] args) {
