@@ -77,7 +77,7 @@ public class SudokuGrid implements Sudoku, Serializable {
     }
     
     /** Controlla se la griglia è completata (nessuna cella vuota) */
-    public boolean isComplete() throws RemoteException {
+    public synchronized boolean isComplete() throws RemoteException {
         for (int r = 0; r < GRID_SIZE; r++) {
             for (int c = 0; c < GRID_SIZE; c++) {
                 if (cells[r][c] == null) return false;
@@ -112,6 +112,7 @@ public class SudokuGrid implements Sudoku, Serializable {
     }
 
     public Map<String, Cell> getSelectedCells() {
+        System.out.println(selectedCells.values());
         return selectedCells;
     }
 }
