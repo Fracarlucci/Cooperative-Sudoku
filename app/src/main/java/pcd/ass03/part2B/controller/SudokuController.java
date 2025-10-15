@@ -1,5 +1,7 @@
 package pcd.ass03.part2B.controller;
 
+import java.util.List;
+
 import pcd.ass03.part2B.model.PlayerInfo;
 import pcd.ass03.part2B.model.SudokuGrid;
 import pcd.ass03.part2B.model.message.SelectCellMessage;
@@ -14,10 +16,7 @@ public interface SudokuController {
     public void joinGame(String sudokuId);
     public void leaveGame();
     public SudokuGrid newGame();
-    public void updateView();
-    public void notifyCellSelected(SelectCellMessage msg);
-    public void notifyCellUnselected(UnselectCellMessage msg);
-    public void notifyCellValueChanged(SetValueMessage msg);
-    public void notifySudokuCreated(SudokuGrid sudokuId, String playerName);
+    public void updateView(String gridId, SudokuGrid sudoku);
+    public void updateSudokuList(List<String> sudokusIds);
     public PlayerInfo getCurrentPlayerInfo();
 }

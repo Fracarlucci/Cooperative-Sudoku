@@ -1,6 +1,7 @@
 package pcd.ass03.part2B.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import pcd.ass03.part2B.model.Cell;
@@ -33,10 +34,8 @@ public class SudokuControllerImpl implements SudokuController {
     
     @Override
     public SudokuGrid newGame() {
-        SudokuGrid sudoku = this.factory.generate(40, player.getPlayerInfo().playerName());
         try {
-            player.createSudoku(sudoku);
-            return sudoku;
+            return player.createSudoku();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -44,10 +43,15 @@ public class SudokuControllerImpl implements SudokuController {
     }
     
     @Override
-    public void updateView() {
+    public void updateView(String gridId, SudokuGrid sudoku) {
         if (view != null) {
-            view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId(), player.getCurrentGrid());
+            view.updateView(gridId, sudoku.getSelectedCells(), sudoku);
         }
+    }
+
+    @Override
+    public void updateSudokuList(List<String> sudokusIds) {
+        view.updateSudokuList(sudokusIds);
     }
     
     // Select cell, if row or col is -1
@@ -56,19 +60,19 @@ public class SudokuControllerImpl implements SudokuController {
     public boolean selectCell(int row, int col) {
         String gridId = player.getCurrentGridId();
         try {
-            if (row == -1 || col == -1) {
-                Cell previouslySelected = selectedCells.remove(player.getPlayerId());
-                if (previouslySelected != null) {
-                    player.unselectCell(previouslySelected.row(), previouslySelected.col());
-                }
-                return true;
-            }
-            if (isAlreadySelectedCell(new Cell(row, col, gridId))) {
+            // if (row == -1 || col == -1) {
+            //     Cell previouslySelected = selectedCells.remove(player.getPlayerId());
+            //     if (previouslySelected != null) {
+            //         player.unselectCell(previouslySelected.row(), previouslySelected.col());
+            //     }
+            //     return true;
+            // }
+            if (isAlreadySelectedCell(new Cell(row, col))) {
                 return false;
             }
-            selectedCells.put(player.getPlayerId(), new Cell(row, col, gridId));
+            // selectedCells.put(player.getPlayerId(), new Cell(row, col));
             player.selectCell(row, col);
-            this.updateView();
+            // this.updateView();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +83,7 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public boolean setCellValue(int row, int col, int value) {
         if (player.tryToSetValue(row, col, value)) {
-            this.updateView();
+            // this.updateView();
             return true;
         }
         return false;
@@ -88,7 +92,7 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public void joinGame(String sudokuId) {
         player.joinGrid(sudokuId);
-        this.updateView();
+        // this.updateView();
     }
     
     // Leave game and unselect player cell
@@ -101,30 +105,6 @@ public class SudokuControllerImpl implements SudokuController {
             e.printStackTrace();
         }
         player.leaveGrid();
-    }
-    
-    @Override
-    public void notifyCellSelected(SelectCellMessage msg) {
-        selectedCells.put(msg.playerId(), new Cell(msg.row(), msg.col(), msg.sudokuId()));
-        this.updateView();
-    }
-    
-    @Override
-    public void notifyCellUnselected(UnselectCellMessage msg) {
-        selectedCells.remove(msg.playerId());
-        this.updateView();
-    }
-    
-    @Override
-    public void notifyCellValueChanged(SetValueMessage msg) {
-        view.checkWin();
-        this.updateView();
-    }
-    
-    @Override
-    public void notifySudokuCreated(SudokuGrid sudokuId, String playerName) {
-        view.addGame(sudokuId.getId(), playerName);
-        this.updateView();
     }
     
     @Override
