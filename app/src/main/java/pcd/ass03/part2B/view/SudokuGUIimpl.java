@@ -12,6 +12,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -416,14 +417,18 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     }
     
     public void checkWin() {
-        if (sudokuGrid != null && sudokuGrid.isComplete()) {
-            clearCellButton.setEnabled(false);
-            winLabel.setText("Sudoku completato!!");
+        try {
+            if (sudokuGrid != null && sudokuGrid.isComplete()) {
+                clearCellButton.setEnabled(false);
+                winLabel.setText("Sudoku completato!!");
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid) {
+    public void updateView(String currentGridId, Map<String, Cell> selectedCells, SudokuGrid currentGrid) {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
 
@@ -443,6 +448,11 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
             refreshGamesList();
         }
     }
+
+    @Override
+    public void updateSudokuList(List<String> sudokusIds) {
+        refreshGamesList();
+    }
     
     private void updateCellSelections(Map<String, Cell> selectedCells) {
         if (gridCells == null || sudokuGrid == null) return;
@@ -459,8 +469,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
             Cell cell = entry.getValue();
             
             // Verify that the cell belongs to the current sudoku grid
-            if (cell.sudokuId().equals(sudokuGrid.getId()) && 
-                cell.row() >= 0 && cell.row() < GRID_SIZE && 
+            if (cell.row() >= 0 && cell.row() < GRID_SIZE && 
                 cell.col() >= 0 && cell.col() < GRID_SIZE) {
                 
                 Color playerColor = playerColors.get(playerId);

@@ -8,7 +8,9 @@ import pcd.ass03.part2B.model.SudokuGrid;
 
 public interface SudokuGUI {
 
-    void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid);
+    void updateView(String currentGridId, Map<String, Cell> selectedCells, SudokuGrid currentGrid);
+
+    void updateSudokuList(List<String> sudokuIds);
 
     void addGame(String id, String creator);
 
