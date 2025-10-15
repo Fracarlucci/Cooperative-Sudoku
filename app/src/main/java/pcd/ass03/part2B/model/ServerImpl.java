@@ -33,10 +33,10 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public synchronized boolean joinGame(String playerId, String gridId) throws RemoteException {
+    public synchronized SudokuGrid joinGame(String playerId, String gridId) throws RemoteException {
         Optional<SudokuGrid> gridOpt = getSudoku(gridId);
         if (gridOpt.isEmpty()) {
-            return false;
+            return null;
         }
         UserCallbackInterface player = players.stream()
                                         .filter(p -> {
@@ -52,7 +52,7 @@ public class ServerImpl implements Server {
         playersInSudoku.putIfAbsent(gridId, new ArrayList<>());
         List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
         playersList.add(player);
-        return true;
+        return gridOpt.get();
     }
 
     @Override
@@ -72,8 +72,9 @@ public class ServerImpl implements Server {
 
     @Override
     public synchronized SudokuGrid createSudoku(String creator) throws RemoteException {
-        SudokuGrid newGrid = factory.generate(50, creator);
+        SudokuGrid newGrid = factory.generate(1, creator);
         grids.add(newGrid);
+        this.notifySudokuListUpdate(newGrid.getId(), creator);
         System.out.println("New Sudoku created with ID: " + newGrid.getId());
         return newGrid;
     }
@@ -103,6 +104,7 @@ public class ServerImpl implements Server {
             return success;
         }
         return false;
+
     }
 
     @Override
@@ -133,24 +135,31 @@ public class ServerImpl implements Server {
     private synchronized void notifyClients(String gridId) throws RemoteException {
         List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
         SudokuGrid sudoku = getSudoku(gridId).orElseThrow();
+        List<UserCallbackInterface> toRemove = new ArrayList<>();
+        if (playersList == null) return;
         playersList.forEach(p -> {
             try {
                 System.out.println("Notifying player " + p.getPlayerId() + " of update in Sudoku " + gridId);
                 p.notifyUser(sudoku);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                toRemove.add(p);
             }
         });
+        // Rimuovo tutti i client non validi
+        playersList.removeAll(toRemove);
+        players.removeAll(toRemove);
     }
 
-    private synchronized void notifySudokuListUpdate() throws RemoteException {
-        List<String> sudokuIds = this.grids.stream().map(SudokuGrid::getId).toList();
+    private synchronized void notifySudokuListUpdate(String sudokuId, String creator) throws RemoteException {
+        List<UserCallbackInterface> toRemove = new ArrayList<>();
         players.forEach(p -> {
             try {
-                p.notifySudokuListUpdate(sudokuIds);
+                p.notifySudokuListUpdate(sudokuId, creator);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                toRemove.add(p);
+                System.out.println("Player non trovato, è stato eliminato");
             }
+            players.removeAll(toRemove);
         });
     }
 }
