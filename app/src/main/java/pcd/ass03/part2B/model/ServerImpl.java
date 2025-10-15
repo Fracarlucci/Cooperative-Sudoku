@@ -33,7 +33,7 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public synchronized boolean registerPlayerInSudoku(String playerId, String gridId) throws RemoteException {
+    public synchronized boolean joinGame(String playerId, String gridId) throws RemoteException {
         Optional<SudokuGrid> gridOpt = getSudoku(gridId);
         if (gridOpt.isEmpty()) {
             return false;
@@ -52,16 +52,35 @@ public class ServerImpl implements Server {
         playersInSudoku.putIfAbsent(gridId, new ArrayList<>());
         List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
         playersList.add(player);
-        System.out.println("Player " + playerId + " registered in Sudoku " + gridId);
         return true;
+    }
+
+    @Override
+    public synchronized void leaveGame(String playerId, String gridId) throws RemoteException {
+        List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
+        if (playersList != null) {
+            playersList.removeIf(p -> {
+                try {
+                    return p.getPlayerId().equals(playerId);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
     public synchronized SudokuGrid createSudoku(String creator) throws RemoteException {
         SudokuGrid newGrid = factory.generate(50, creator);
         grids.add(newGrid);
-        System.out.println("New Sudoku created with ID: " + newGrid.getId() + " by player: " + creator);
+        System.out.println("New Sudoku created with ID: " + newGrid.getId());
         return newGrid;
+    }
+
+    @Override
+    public synchronized List<SudokuGrid> getSudokus() throws RemoteException {
+        return new ArrayList<>(grids);
     }
     
     @Override
@@ -81,7 +100,6 @@ public class ServerImpl implements Server {
             if (success) {
                 notifyClients(msg.sudokuId());
             }
-            System.out.println("Player set value " + msg.value() + " at (" + msg.row() + "," + msg.col() + ") in Sudoku " + msg.sudokuId());
             return success;
         }
         return false;
@@ -117,7 +135,19 @@ public class ServerImpl implements Server {
         SudokuGrid sudoku = getSudoku(gridId).orElseThrow();
         playersList.forEach(p -> {
             try {
+                System.out.println("Notifying player " + p.getPlayerId() + " of update in Sudoku " + gridId);
                 p.notifyUser(sudoku);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private synchronized void notifySudokuListUpdate() throws RemoteException {
+        List<String> sudokuIds = this.grids.stream().map(SudokuGrid::getId).toList();
+        players.forEach(p -> {
+            try {
+                p.notifySudokuListUpdate(sudokuIds);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

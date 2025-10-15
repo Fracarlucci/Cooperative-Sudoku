@@ -14,10 +14,14 @@ public interface Server extends Remote {
     // Ho utilizzato un'interfaccia perchè RMI passa solo oggetti remoti attraverso interfacce Remote, mai classi concrete.
     public void registerPlayer(UserCallbackInterface player) throws RemoteException;
 
-    public boolean registerPlayerInSudoku(String playerId, String gridId) throws RemoteException;
+    public boolean joinGame(String playerId, String gridId) throws RemoteException;
+
+    public void leaveGame(String playerId, String gridId) throws RemoteException;
 
     public SudokuGrid createSudoku(String creator) throws RemoteException;
     
+    public List<SudokuGrid> getSudokus() throws RemoteException;
+
     public Optional<SudokuGrid> getSudoku(String gridId) throws RemoteException;
 
     public boolean setCellValue(SetValueMessage msg) throws RemoteException;
