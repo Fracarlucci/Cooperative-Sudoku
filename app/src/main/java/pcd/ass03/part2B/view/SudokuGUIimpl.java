@@ -172,8 +172,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
             currentPlayerInfo.playerName()
         );
 
-        availableGames.add(currentGame);
-
         switchToGameScreen();
         this.controller.joinGame(currentGame.gameId());
     }
@@ -301,6 +299,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
                     if (controller.setCellValue(r, c, value)) {
                         cell.setText(String.valueOf(value));
                         updateGameDisplay();
+                        System.out.println("Player " + currentPlayerInfo.playerName() + " set cell (" + r + "," + c + ") to " + value);
                         checkWin();
                     } else {
                         e.consume();
@@ -417,13 +416,9 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     }
     
     public void checkWin() {
-        try {
-            if (sudokuGrid != null && sudokuGrid.isComplete()) {
-                clearCellButton.setEnabled(false);
-                winLabel.setText("Sudoku completato!!");
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        if (sudokuGrid != null && controller.isSudokuComplete()) {
+            clearCellButton.setEnabled(false);
+            winLabel.setText("Sudoku completato!!");
         }
     }
 
@@ -447,11 +442,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         } else {
             refreshGamesList();
         }
-    }
-
-    @Override
-    public void updateSudokuList(List<String> sudokusIds) {
-        refreshGamesList();
     }
     
     private void updateCellSelections(Map<String, Cell> selectedCells) {
@@ -488,5 +478,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         if (!alreadyExists) {
             this.availableGames.add(new GameInfo(id, creator));
         }
+        refreshGamesList();
     }
 }

@@ -10,8 +10,6 @@ public interface SudokuGUI {
 
     void updateView(String currentGridId, Map<String, Cell> selectedCells, SudokuGrid currentGrid);
 
-    void updateSudokuList(List<String> sudokuIds);
-
     void addGame(String id, String creator);
 
     void checkWin();
