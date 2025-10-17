@@ -258,7 +258,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         cell.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
         cell.setPreferredSize(new Dimension(50, 50));
         
-        // Create border for 3x3 subgrids
         Border border;
         int top = (row % 3 == 0 && row != 0) ? 3 : 1;
         int left = (col % 3 == 0 && col != 0) ? 3 : 1;
@@ -337,7 +336,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
 
         this.winLabel = new JLabel("");
         winLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
-        winLabel.setForeground(new Color(34, 139, 34)); // Verde
+        winLabel.setForeground(new Color(34, 139, 34));
         gbc.gridy = 3;
         panel.add(winLabel, gbc);
         
@@ -410,7 +409,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
             playerLabel.setText(String.format("Giocatore: %s - Partita: %s",
                 currentPlayerInfo.playerName(),
                 currentGame.gameId()
-                ));
+            ));
         }
     }
     
@@ -418,19 +417,19 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         if (controller.isSudokuComplete()) {
             clearCellButton.setEnabled(false);
             winLabel.setText("Sudoku completato!!");
-        }
-        else {
+        } else {
             clearCellButton.setEnabled(true);
             winLabel.setText("");
         }
     }
 
     @Override
-    public void updateView(String currentGridId, Map<String, Cell> selectedCells, SudokuGrid currentGrid) {
+    public void updateView(Map<String, Cell> selectedCells, SudokuGrid currentGrid) {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
 
         this.sudokuGrid = currentGrid;
+        // Assign colors to new players
         List<String> playerToAssignColor = selectedCells.keySet().stream().filter(id -> !playerColors.containsKey(id)).toList();
         for (String playerId : playerToAssignColor) {
             playerColors.put(playerId, PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]);
@@ -439,7 +438,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
 
         // If we are in game, update the grid
         // else update games list
-        if (currentGridId != null && sudokuGrid != null && sudokuGrid.getId().equals(currentGridId)) {
+        if (sudokuGrid != null) {
             updateGameDisplay();
             updateCellSelections(selectedCells);
         } else {

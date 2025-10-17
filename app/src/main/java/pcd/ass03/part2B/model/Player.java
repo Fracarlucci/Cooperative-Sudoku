@@ -72,7 +72,7 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
         if (currentSudoku != null) {
             this.sudoku = currentSudoku;
             this.currentGridId = gridId;
-            controller.updateView(gridId, currentSudoku);
+            controller.updateView(currentSudoku);
         } else {
             throw new IllegalArgumentException("Sudoku with ID " + gridId + " does not exist");
         }
@@ -226,7 +226,7 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     @Override
     public void notifyUser(SudokuGrid sudoku) throws RemoteException {
         this.sudoku = sudoku;
-        this.controller.updateView(this.currentGridId, this.sudoku);
+        this.controller.updateView(this.sudoku);
     }
 
     @Override
