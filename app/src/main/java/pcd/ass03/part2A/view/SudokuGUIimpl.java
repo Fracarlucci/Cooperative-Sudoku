@@ -424,7 +424,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     }
 
     @Override
-    public void updateView(String currentGridId, Map<String, Cell> selectedCells, SudokuGrid currentGrid) {
+    public void updateView(Map<String, Cell> selectedCells, SudokuGrid currentGrid) {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
 
@@ -437,7 +437,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
 
         // If we are in game, update the grid
         // else update games list
-        if (currentGridId != null && sudokuGrid != null && sudokuGrid.getId().equals(currentGridId)) {
+        if (sudokuGrid != null) {
             updateGameDisplay();
             updateCellSelections(selectedCells);
         } else {
