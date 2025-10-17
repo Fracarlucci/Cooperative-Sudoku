@@ -19,9 +19,9 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     private final String playerName;
     private final Server server;
     private final String color = String.format("#%06x", (int)(Math.random() * 0xFFFFFF));
-    private volatile String currentGridId;
-    private volatile int selectedRow = -1;
-    private volatile int selectedCol = -1;
+    private String currentGridId;
+    private int selectedRow = -1;
+    private int selectedCol = -1;
 
     private SudokuController controller;
 
