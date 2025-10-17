@@ -1,7 +1,6 @@
 package pcd.ass03.part2A.view;
 
 import pcd.ass03.part2A.controller.SudokuController;
-import pcd.ass03.part2A.controller.SudokuControllerImpl;
 import pcd.ass03.part2A.model.Cell;
 import pcd.ass03.part2A.model.GameInfo;
 import pcd.ass03.part2A.model.PlayerInfo;
@@ -56,9 +55,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         this.controller = controller;
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         
-        if (controller instanceof SudokuControllerImpl) {
-            controller.setView(this);
-        }
+        controller.setView(this);
         
         initializeGUI();
     }

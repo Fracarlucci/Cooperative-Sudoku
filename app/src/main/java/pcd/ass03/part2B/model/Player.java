@@ -84,7 +84,7 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
             throw new IllegalStateException("Player is not in a game");
         }
         try {
-            if (row != this.selectedRow || col != this.selectedCol || (this.selectedRow == -1 || this.selectedCol == -1)) {
+            if (this.selectedRow == -1 || this.selectedCol == -1 || row != this.selectedRow || col != this.selectedCol) {
                 return false;
             }
             if (value == 0 || value > 9) {
