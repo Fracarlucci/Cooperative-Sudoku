@@ -225,7 +225,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         panel.setBackground(BACKGROUND_COLOR);
         panel.setBorder(BorderFactory.createTitledBorder(""));
         
-        playerLabel = new JLabel("Nessun giocatore connesso");
+        playerLabel = new JLabel("");
         playerLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
         panel.add(playerLabel);
         
