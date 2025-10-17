@@ -1,4 +1,4 @@
 package pcd.ass03.part2A.model;
 
-public record PlayerInfo(String playerId, String playerName, boolean isActive, 
+public record PlayerInfo(String playerId, String playerName, 
                         String currentGridId, int selectedRow, int selectedCol) {}

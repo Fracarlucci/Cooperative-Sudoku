@@ -197,7 +197,7 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
     }
 
     public PlayerInfo getPlayerInfo() {
-        return new PlayerInfo(playerId, playerName, isInGame(), 
+        return new PlayerInfo(playerId, playerName,
                               currentGridId, selectedRow, selectedCol);
     }
 
