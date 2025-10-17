@@ -1,6 +1,5 @@
 package pcd.ass03.part2A.view;
 
-import java.util.List;
 import java.util.Map;
 
 import pcd.ass03.part2A.model.Cell;
