@@ -9,7 +9,6 @@ import pcd.ass03.part2A.model.PlayerInfo;
 import pcd.ass03.part2A.model.SudokuFactory;
 import pcd.ass03.part2A.model.SudokuGrid;
 import pcd.ass03.part2A.model.message.SelectCellMessage;
-import pcd.ass03.part2A.model.message.SetValueMessage;
 import pcd.ass03.part2A.model.message.UnselectCellMessage;
 import pcd.ass03.part2A.view.SudokuGUI;
 
