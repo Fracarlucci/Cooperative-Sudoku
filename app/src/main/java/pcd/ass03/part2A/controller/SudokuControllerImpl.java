@@ -46,7 +46,7 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public void updateView() {
         if (view != null) {
-            view.updateView(player.getCurrentGridId(), selectedCells, player.getCurrentGrid());
+            view.updateView(selectedCells, player.getCurrentGrid());
         }
     }
     
@@ -116,7 +116,7 @@ public class SudokuControllerImpl implements SudokuController {
     }
     
     @Override
-    public void notifyCellValueChanged(SetValueMessage msg) {
+    public void notifyCellValueChanged() {
         view.checkWin();
         this.updateView();
     }
