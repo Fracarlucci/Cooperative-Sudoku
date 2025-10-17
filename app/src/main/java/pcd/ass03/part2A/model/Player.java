@@ -157,8 +157,8 @@ public class Player {
                             grid.setValue(setValueMessage.row(), setValueMessage.col(), Integer.parseInt(setValueMessage.value()));
                         }
 
-                        // It updates the gui only if the grid changed is the current grid
-                        if (controller != null && grid.getId() == currentGridId) {
+                        // Update the GUI only if the changed grid is the current one
+                        if (controller != null && grid.getId().equals(currentGridId)) {
                             controller.notifyCellValueChanged();
                         }
                     });

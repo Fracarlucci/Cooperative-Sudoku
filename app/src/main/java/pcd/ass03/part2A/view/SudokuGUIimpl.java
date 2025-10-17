@@ -21,7 +21,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     private static final int GRID_SIZE = 9;
     private static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
     private static final Color GRID_COLOR = new Color(120, 120, 120);
-    private static final Color PLAYER_COLORS[] = {
+    private static final Color[] PLAYER_COLORS = {
         new Color(255, 182, 193),
         new Color(144, 238, 144), 
         new Color(255, 218, 185),
@@ -57,7 +57,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         
         if (controller instanceof SudokuControllerImpl) {
-            ((SudokuControllerImpl) controller).setView(this);
+            controller.setView(this);
         }
         
         initializeGUI();
@@ -236,7 +236,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BACKGROUND_COLOR);
         
-        JPanel gridPanel = new JPanel(new GridLayout(9, 9, 1, 1));
+        JPanel gridPanel = new JPanel(new GridLayout(GRID_SIZE, GRID_SIZE, 1, 1));
         gridPanel.setBackground(GRID_COLOR);
         gridPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         
@@ -263,8 +263,8 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         Border border;
         int top = (row % 3 == 0 && row != 0) ? 3 : 1;
         int left = (col % 3 == 0 && col != 0) ? 3 : 1;
-        int bottom = (row == 8) ? 3 : 1;
-        int right = (col == 8) ? 3 : 1;
+        int bottom = (row == GRID_SIZE - 1) ? 3 : 1;
+        int right = (col == GRID_SIZE - 1) ? 3 : 1;
         border = BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK);
         cell.setBorder(border);
         

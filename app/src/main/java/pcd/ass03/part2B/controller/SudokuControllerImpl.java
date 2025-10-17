@@ -6,7 +6,6 @@ import java.util.Map;
 import pcd.ass03.part2B.model.Cell;
 import pcd.ass03.part2B.model.Player;
 import pcd.ass03.part2B.model.PlayerInfo;
-import pcd.ass03.part2B.model.SudokuFactory;
 import pcd.ass03.part2B.model.SudokuGrid;
 import pcd.ass03.part2B.view.SudokuGUI;
 
