@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -71,10 +73,10 @@ func (p *Player) Run(wg *sync.WaitGroup) {
 			case Hint:
 				p.processHint(msg)
 			case Win:
-				fmt.Printf("[%s] 🎉 HO VINTO! Il numero era %d\n", p.Name, msg.Number)
+				fmt.Printf("[%s] HO VINTO! Il numero era %d\n", p.Name, msg.Number)
 				p.Running = false
 			case Lose:
-				fmt.Printf("[%s] 😞 Ho perso. %s ha indovinato il numero %d\n",
+				fmt.Printf("[%s] Ho perso. %s ha indovinato il numero %d\n",
 					p.Name, msg.Winner, msg.Number)
 				p.Running = false
 			}
@@ -287,20 +289,26 @@ func (o *Oracle) processGuesses(guesses []Message) string {
 func main() {
 	fmt.Println("============================================================")
 	fmt.Println("               GUESS THE NUMBER GAME")
-	fmt.Println("============================================================\n")
+	fmt.Println("============================================================")
 
 	// Parametri del gioco
 	const (
 		NUM_PLAYERS = 4
-		MAX_VALUE   = 100
 	)
+
+	args := os.Args[1:]
+	max_value, err := strconv.Atoi(args[0])
+	if err != nil {
+		fmt.Println("Errore nella conversione:", err)
+		return
+	}
 
 	fmt.Printf("Configurazione:\n")
 	fmt.Printf("  - Numero giocatori: %d\n", NUM_PLAYERS)
-	fmt.Printf("  - Range numeri: 0-%d\n\n", MAX_VALUE)
+	fmt.Printf("  - Range numeri: 0-%d\n\n", max_value)
 
 	// Crea l'oracolo
-	oracle := NewOracle(NUM_PLAYERS, MAX_VALUE)
+	oracle := NewOracle(NUM_PLAYERS, max_value)
 
 	// WaitGroup per sincronizzare tutti i goroutine
 	var wg sync.WaitGroup
@@ -308,7 +316,7 @@ func main() {
 	// Crea i giocatori
 	players := make([]*Player, NUM_PLAYERS)
 	for i := 0; i < NUM_PLAYERS; i++ {
-		player := NewPlayer(i+1, MAX_VALUE, oracle.MessageChan)
+		player := NewPlayer(i+1, max_value, oracle.MessageChan)
 		players[i] = player
 		oracle.RegisterPlayer(player)
 	}
