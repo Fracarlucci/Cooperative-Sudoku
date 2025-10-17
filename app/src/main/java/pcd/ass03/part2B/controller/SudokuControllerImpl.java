@@ -13,13 +13,11 @@ import pcd.ass03.part2B.view.SudokuGUI;
 public class SudokuControllerImpl implements SudokuController {
     
     private final Player player;
-    private final SudokuFactory factory;
-    private final Map<String, Cell> selectedCells;
+    private Map<String, Cell> selectedCells;
     private SudokuGUI view;
     
     public SudokuControllerImpl(Player player) {
         this.player = player;
-        this.factory = new SudokuFactory();
         this.selectedCells = new HashMap<>();
         this.view = null;
     }
@@ -40,15 +38,15 @@ public class SudokuControllerImpl implements SudokuController {
     
     @Override
     public void updateView(SudokuGrid sudoku) {
+        this.selectedCells = sudoku.getSelectedCells(); 
         if (view != null) {
-            view.updateView(sudoku.getSelectedCells(), sudoku);
+            view.updateView(this.selectedCells, sudoku);
         }
     }
 
     @Override
     public void updateSudokuList(String sudokuId, String creator) {
         view.addGame(sudokuId, creator);
-        // view.updateSudokuList(sudokuId, creator);
     }
     
     // Select cell, if row or col is -1
@@ -57,19 +55,10 @@ public class SudokuControllerImpl implements SudokuController {
     public boolean selectCell(int row, int col) {
         String gridId = player.getCurrentGridId();
         try {
-            // if (row == -1 || col == -1) {
-            //     Cell previouslySelected = selectedCells.remove(player.getPlayerId());
-            //     if (previouslySelected != null) {
-            //         player.unselectCell(previouslySelected.row(), previouslySelected.col());
-            //     }
-            //     return true;
-            // }
             if (isAlreadySelectedCell(new Cell(row, col))) {
                 return false;
             }
-            // selectedCells.put(player.getPlayerId(), new Cell(row, col));
             player.selectCell(row, col);
-            // this.updateView();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,7 +69,6 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public boolean setCellValue(int row, int col, int value) {
         if (player.tryToSetValue(row, col, value)) {
-            // this.updateView();
             return true;
         }
         return false;
@@ -89,7 +77,6 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public void joinGame(String sudokuId) {
         player.joinGrid(sudokuId);
-        // this.updateView();
     }
     
     // Leave game and unselect player cell
