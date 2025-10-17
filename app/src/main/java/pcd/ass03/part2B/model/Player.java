@@ -84,10 +84,10 @@ public class Player extends UnicastRemoteObject implements UserCallbackInterface
             throw new IllegalStateException("Player is not in a game");
         }
         try {
-            if (row != this.selectedRow || col != this.selectedCol) {
-                throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
+            if (row != this.selectedRow || col != this.selectedCol || (this.selectedRow == -1 || this.selectedCol == -1)) {
+                return false;
             }
-            if (value < 1 || value > 9) {
+            if (value == 0 || value > 9) {
                 return false;
             }
             sendSetValue(row, col, value);

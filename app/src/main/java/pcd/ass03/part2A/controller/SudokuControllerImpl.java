@@ -46,7 +46,7 @@ public class SudokuControllerImpl implements SudokuController {
     @Override
     public void updateView() {
         if (view != null) {
-            view.updateView(player.getCurrentGridId(), selectedCells, player.getSudokusId(), player.getCurrentGrid());
+            view.updateView(player.getCurrentGridId(), selectedCells, player.getCurrentGrid());
         }
     }
     

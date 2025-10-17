@@ -260,7 +260,6 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         cell.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
         cell.setPreferredSize(new Dimension(50, 50));
         
-        // Create border for 3x3 subgrids
         Border border;
         int top = (row % 3 == 0 && row != 0) ? 3 : 1;
         int left = (col % 3 == 0 && col != 0) ? 3 : 1;
@@ -340,7 +339,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
 
         this.winLabel = new JLabel("");
         winLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
-        winLabel.setForeground(new Color(34, 139, 34)); // Verde
+        winLabel.setForeground(new Color(34, 139, 34));
         gbc.gridy = 3;
         panel.add(winLabel, gbc);
         
@@ -377,9 +376,11 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         if (currentPlayerInfo != null) {
             int row = currentPlayerInfo.selectedRow();
             int col = currentPlayerInfo.selectedCol();
-            controller.setCellValue(row, col, -1);
-            gridCells[row][col].setText("");
-            updateGameDisplay();
+            if (row > -1 && col > -1) {
+                controller.setCellValue(row, col, -1);
+                gridCells[row][col].setText("");
+                updateGameDisplay();
+            }
         }
     }
     
@@ -423,7 +424,7 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
     }
 
     @Override
-    public void updateView(String currentGridId, Map<String, Cell> selectedCells, List<String> availableSudokusId, SudokuGrid currentGrid) {
+    public void updateView(String currentGridId, Map<String, Cell> selectedCells, SudokuGrid currentGrid) {
         this.currentPlayerInfo = controller.getCurrentPlayerInfo();
         updatePlayerInfo();
 

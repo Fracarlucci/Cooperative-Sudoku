@@ -72,7 +72,7 @@ public class ServerImpl implements Server {
 
     @Override
     public synchronized SudokuGrid createSudoku(String creator) throws RemoteException {
-        SudokuGrid newGrid = factory.generate(1, creator);
+        SudokuGrid newGrid = factory.generate(50, creator);
         grids.add(newGrid);
         this.notifySudokuListUpdate(newGrid.getId(), creator);
         System.out.println("New Sudoku created with ID: " + newGrid.getId());

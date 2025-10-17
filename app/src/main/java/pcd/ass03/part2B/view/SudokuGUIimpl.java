@@ -373,9 +373,11 @@ public class SudokuGUIimpl extends JFrame implements SudokuGUI {
         if (currentPlayerInfo != null) {
             int row = currentPlayerInfo.selectedRow();
             int col = currentPlayerInfo.selectedCol();
-            controller.setCellValue(row, col, -1);
-            gridCells[row][col].setText("");
-            updateGameDisplay();
+            if (row > -1 && col > -1) {
+                controller.setCellValue(row, col, -1);
+                gridCells[row][col].setText("");
+                updateGameDisplay();
+            }
         }
     }
 

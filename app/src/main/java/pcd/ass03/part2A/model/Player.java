@@ -175,10 +175,10 @@ public class Player {
                                         .findFirst()
                                         .orElseThrow(() -> new IllegalStateException("Current grid not found"));
         try {
-            if (row != this.selectedRow || col != this.selectedCol) {
-                throw new IllegalArgumentException("Cell (" + row + "," + col + ") is not selected");
+            if (row != this.selectedRow || col != this.selectedCol || (this.selectedRow == -1 || this.selectedCol == -1)) {
+                return false;
             }
-            if (value < 1 || value > 9) {
+            if (value == 0 || value > 9) {
                 return false;
             }
             if (currentGrid.setValue(row, col, value)) {
