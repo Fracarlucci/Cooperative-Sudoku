@@ -32,6 +32,7 @@ public class ServerImpl implements Server {
         }
     }
 
+    // A player joins a game, if the game and the player exist
     @Override
     public synchronized SudokuGrid joinGame(String playerId, String gridId) throws RemoteException {
         Optional<SudokuGrid> gridOpt = getSudoku(gridId);
@@ -50,6 +51,7 @@ public class ServerImpl implements Server {
                                         .findFirst()
                                         .orElse(null);
         playersInSudoku.putIfAbsent(gridId, new ArrayList<>());
+        // add player in the list of players in that sudoku
         List<UserCallbackInterface> playersList = playersInSudoku.get(gridId);
         playersList.add(player);
         return gridOpt.get();
@@ -92,6 +94,7 @@ public class ServerImpl implements Server {
                     .findFirst();
     }
 
+    // if sudoku is found, set the value and notify all the players in that sudoku
     @Override
     public synchronized boolean setCellValue(SetValueMessage msg) throws RemoteException {
         Optional<SudokuGrid> sudokuOpt = getSudoku(msg.sudokuId());
@@ -107,6 +110,7 @@ public class ServerImpl implements Server {
 
     }
 
+    // if sudoku is found, select the cell and notify all the players in that sudoku
     @Override
     public synchronized boolean selectCell(SelectCellMessage msg) throws RemoteException {
         Optional<SudokuGrid> sudokuOpt = getSudoku(msg.sudokuId());
@@ -150,6 +154,7 @@ public class ServerImpl implements Server {
         players.removeAll(toRemove);
     }
 
+    // This notify is used for updating all clients when a new sudoku is created
     private synchronized void notifySudokuListUpdate(String sudokuId, String creator) throws RemoteException {
         List<UserCallbackInterface> toRemove = new ArrayList<>();
         players.forEach(p -> {
