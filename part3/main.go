@@ -91,7 +91,7 @@ func (p *Player) makeGuess() {
 
 	p.mu.Lock()
 	// Strategia: binary search - prova il valore medio
-	guess := (p.MinPossible + p.MaxPossible) / 2
+	guess := rand.Intn(p.MaxPossible-p.MinPossible+1) + p.MinPossible
 	p.mu.Unlock()
 
 	fmt.Printf("[%s] Tento: %d (range: %d-%d)\n",
