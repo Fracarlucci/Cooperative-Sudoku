@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
-	"time"
 )
 
 type Player struct {
@@ -53,8 +52,6 @@ func (p *Player) Run(wg *sync.WaitGroup) {
 }
 
 func (p *Player) makeGuess() {
-	// Random delay to simulate concurrency
-	time.Sleep(time.Duration(10+rand.Intn(40)) * time.Millisecond)
 
 	p.mu.Lock()
 	guess := rand.Intn(p.MaxPossible-p.MinPossible+1) + p.MinPossible
