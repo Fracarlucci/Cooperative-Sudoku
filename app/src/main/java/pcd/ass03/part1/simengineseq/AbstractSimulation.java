@@ -151,4 +151,8 @@ public abstract class AbstractSimulation {
   public void setCurrentWallTime() {
     this.currentWallTime = System.currentTimeMillis();
   }
+
+  public void setEndWallTime() {
+    this.endWallTime = System.currentTimeMillis();
+  }
 }
