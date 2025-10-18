@@ -53,9 +53,7 @@ func (p *Player) Run(wg *sync.WaitGroup) {
 
 func (p *Player) makeGuess() {
 
-	p.mu.Lock()
 	guess := rand.Intn(p.MaxPossible-p.MinPossible+1) + p.MinPossible
-	p.mu.Unlock()
 
 	fmt.Printf("[%s] Tento: %d (range: %d-%d)\n",
 		p.Name, guess, p.MinPossible, p.MaxPossible)
