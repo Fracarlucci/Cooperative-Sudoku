@@ -24,7 +24,7 @@ func NewPlayer(id int, maxValue int, oracleChan chan Message) *Player {
 		Name:        fmt.Sprintf("Player_%d", id),
 		MaxValue:    maxValue,
 		OracleChan:  oracleChan,
-		MessageChan: make(chan Message, 10),
+		MessageChan: make(chan Message),
 		MinPossible: 0,
 		MaxPossible: maxValue,
 		Running:     true,

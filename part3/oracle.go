@@ -24,7 +24,7 @@ func NewOracle(numPlayers int, maxValue int) *Oracle {
 		NumPlayers:   numPlayers,
 		MaxValue:     maxValue,
 		SecretNumber: rand.Intn(maxValue + 1),
-		MessageChan:  make(chan Message, 100),
+		MessageChan:  make(chan Message),
 		Players:      make([]*Player, 0),
 		RoundNumber:  0,
 		Running:      true,
@@ -87,7 +87,7 @@ func (o *Oracle) startRound() {
 	for _, player := range o.Players {
 		player.MessageChan <- msg
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 // Get guesses from players
