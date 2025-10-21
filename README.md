@@ -1,5 +1,2 @@
 # Cooperative Sudoku
 
-## TODO
-
-- [ ] Documentation
