@@ -2,5 +2,4 @@
 
 ## TODO
 
-- [ ] Check massive test
 - [ ] Documentation

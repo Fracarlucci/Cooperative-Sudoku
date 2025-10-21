@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
-	"time"
 )
 
 type Player struct {
@@ -25,7 +24,7 @@ func NewPlayer(id int, maxValue int, oracleChan chan Message) *Player {
 		Name:        fmt.Sprintf("Player_%d", id),
 		MaxValue:    maxValue,
 		OracleChan:  oracleChan,
-		MessageChan: make(chan Message, 10),
+		MessageChan: make(chan Message),
 		MinPossible: 0,
 		MaxPossible: maxValue,
 		Running:     true,
@@ -53,12 +52,8 @@ func (p *Player) Run(wg *sync.WaitGroup) {
 }
 
 func (p *Player) makeGuess() {
-	// Random delay to simulate concurrency
-	time.Sleep(time.Duration(10+rand.Intn(40)) * time.Millisecond)
 
-	p.mu.Lock()
 	guess := rand.Intn(p.MaxPossible-p.MinPossible+1) + p.MinPossible
-	p.mu.Unlock()
 
 	fmt.Printf("[%s] Tento: %d (range: %d-%d)\n",
 		p.Name, guess, p.MinPossible, p.MaxPossible)

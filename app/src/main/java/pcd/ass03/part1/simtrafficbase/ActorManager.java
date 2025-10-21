@@ -101,6 +101,8 @@ public class ActorManager extends AbstractBehavior<Message>{
             if (nStepsDone >= env.getnSteps()) {
               this.simulation.stop();
               getContext().getSelf().tell(new Stop());
+              simulation.setEndWallTime();
+              System.out.println("Completed in " + simulation.getSimulationDuration() + "ms");
             } else {
               simulation.setCurrentWallTime();
               if (this.trafficLights.isEmpty()) {
