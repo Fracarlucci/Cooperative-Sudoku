@@ -52,7 +52,6 @@ public class SudokuControllerImpl implements SudokuController {
     // player will unselect the cell
     @Override
     public boolean selectCell(int row, int col) {
-        String gridId = player.getCurrentGridId();
         try {
             if (isAlreadySelectedCell(new Cell(row, col))) {
                 return false;
